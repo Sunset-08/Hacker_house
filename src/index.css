@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sand: #F9D342;
+  --color-neon-coral: #FF5B35;
+  --color-beach-teal: #00F5FF;
+  --color-dark-coal: #08080C;
+  --color-dark-card: #0F0F16;
+  --color-zinc-950: #040406;
+  --color-border-card: #1C1C26;
+  --color-border-neon: rgba(255, 91, 53, 0.4);
+
+  --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-display: "Syne", "Outfit", system-ui, -apple-system, sans-serif;
+  
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-glitch: glitch 1s steps(2, start) infinite;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animations */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+/* Custom Base Styles */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--color-dark-coal);
+  color: #F3F4F6;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Custom Utilities for HackerHouse Goa Aesthetic */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 91, 53, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.dot-grid-teal {
+  background-image: radial-gradient(rgba(0, 245, 255, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.dot-grid-white {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.valorant-bracket-l::before {
+  content: '[';
+  color: var(--color-neon-coral);
+  margin-right: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.valorant-bracket-r::after {
+  content: ']';
+  color: var(--color-neon-coral);
+  margin-left: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.clip-slanted {
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 0% 100%);
+}
+
+.clip-slanted-both {
+  clip-path: polygon(4% 0, 100% 0, 96% 100%, 0% 100%);
+}
+
+.clip-corner {
+  clip-path: polygon(0 0, 92% 0, 100% 30%, 100% 100%, 8% 100%, 0% 70%);
+}
+
+.clip-button {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.clip-card-header {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark-coal);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-card);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-coral);
+}
