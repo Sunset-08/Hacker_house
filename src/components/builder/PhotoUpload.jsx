@@ -1,14 +1,54 @@
 import React, { useState, useRef } from 'react';
 import { useBuilderContext } from '../../context/BuilderContext';
-import { Camera, Upload, Trash2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Camera, Upload, Trash2, AlertCircle } from 'lucide-react';
+
+/**
+ * Resizes a large image locally on an offscreen HTML5 canvas to a max dimension.
+ * Keeps export crisp (1200px max) while preventing browser memory lag on huge phone photos.
+ */
+function processAndResizeImage(file, maxDimension = 1200) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convert to compressed data URL (JPEG 0.90 for high quality & fast render)
+                const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.90);
+                resolve(resizedDataUrl);
+            };
+            img.onerror = () => reject(new Error('Failed to load image for resizing.'));
+            img.src = event.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read image file.'));
+        reader.readAsDataURL(file);
+    });
+}
 
 export default function PhotoUpload() {
     const { photo, setPhoto } = useBuilderContext();
     const [isDragging, setIsDragging] = useState(false);
     const [uploadError, setUploadError] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef(null);
 
-    const handleFileSelect = (file) => {
+    const handleFileSelect = async (file) => {
         setUploadError('');
         if (!file) return;
 
@@ -18,17 +58,14 @@ export default function PhotoUpload() {
             return;
         }
 
-        // Limit size to ~10MB for local browser memory safety
-        if (file.size > 10 * 1024 * 1024) {
-            setUploadError('Image size exceeds 10MB limit.');
-            return;
-        }
-
+        setIsProcessing(true);
         try {
-            const objectUrl = URL.createObjectURL(file);
-            setPhoto(objectUrl);
+            const resizedUrl = await processAndResizeImage(file, 1200);
+            setPhoto(resizedUrl);
         } catch (err) {
-            setUploadError('Failed to read image locally.');
+            setUploadError('That photo fought back. Failed to process photo locally.');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -70,7 +107,7 @@ export default function PhotoUpload() {
                     <Camera className="w-3.5 h-3.5" /> 3. PHOTO UPLOAD
                 </span>
                 <span className="text-[9px] font-mono text-gray-500 uppercase">
-                    LOCAL ONLY // NO UPLOAD
+                    LOCAL PROCESS // HIGH RES
                 </span>
             </div>
 
@@ -109,10 +146,10 @@ export default function PhotoUpload() {
                         </div>
 
                         <span className="text-xs font-mono font-bold text-white uppercase tracking-wide block">
-                            DROP PHOTO HERE OR CLICK TO UPLOAD
+                            {isProcessing ? 'COMPILING PHOTO BUFFER...' : 'DROP PHOTO HERE OR CLICK TO UPLOAD'}
                         </span>
                         <span className="text-[9px] font-mono text-gray-500 uppercase mt-1">
-                            PNG, JPG, HEIC // ALL ORIENTATIONS SUPPORTED
+                            PNG, JPG, HEIC // AUTO-OPTIMIZED FOR 300 DPI EXPORT
                         </span>
                     </div>
                 </div>
@@ -129,10 +166,10 @@ export default function PhotoUpload() {
                         </div>
                         <div>
                             <span className="text-xs font-mono font-bold text-white uppercase block">
-                                PHOTO LOADED
+                                PHOTO OPTIMIZED & READY
                             </span>
                             <span className="text-[9px] font-mono text-beach-teal uppercase block mt-0.5">
-                                LOCAL MEMORY BUFFER
+                                LOCAL CANVAS BUFFER (1200PX MAX)
                             </span>
                         </div>
                     </div>

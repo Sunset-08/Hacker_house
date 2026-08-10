@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useBuilderContext } from '../../context/BuilderContext';
-import { Users, Camera, ShieldCheck, Terminal, Sparkles, AlertTriangle } from 'lucide-react';
+import { Camera, ShieldCheck, Sparkles, AlertTriangle } from 'lucide-react';
 
-export default function CardPreview() {
+const CardPreview = forwardRef(function CardPreview({ isExportMode = false }, ref) {
     const {
         name,
         role,
@@ -18,11 +18,24 @@ export default function CardPreview() {
     const displayName = name.trim() ? name.toUpperCase() : 'BUILDER NAME';
     const displayRole = role.trim() ? role.toUpperCase() : 'STACK / ROLE';
 
+    // Dynamic font sizing based on length to prevent layout breakage
+    const getNameFontSize = (text) => {
+        if (text.length > 24) return 'text-sm sm:text-base leading-tight';
+        if (text.length > 16) return 'text-base sm:text-lg leading-tight';
+        return 'text-xl sm:text-2xl leading-none';
+    };
+
+    const getRoleFontSize = (text) => {
+        if (text.length > 30) return 'text-[8px] sm:text-[9px] leading-tight';
+        return 'text-[9px] sm:text-[10px] leading-tight';
+    };
+
     return (
         <div className="w-full flex flex-col items-center select-none">
 
             {/* Main Outer Card Container */}
             <div
+                ref={ref}
                 className={`w-full aspect-[4/6] max-w-[340px] relative shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col justify-between p-5 rounded-none transition-all duration-300 ${templateConfig.bgClass}`}
             >
                 {/* Background dot grid overlay */}
@@ -33,14 +46,16 @@ export default function CardPreview() {
                 {/* Ambient template gradient overlay */}
                 <div className={`absolute inset-0 pointer-events-none z-10 ${templateConfig.overlayClass}`} />
 
-                {/* CRT Scanline overlay */}
-                <div className="absolute inset-0 pointer-events-none z-20 opacity-5 bg-gradient-to-b from-transparent via-white/10 to-transparent animate-scanline" />
+                {/* CRT Scanline overlay (hidden during PNG export to avoid stripe artifacts) */}
+                {!isExportMode && (
+                    <div className="absolute inset-0 pointer-events-none z-20 opacity-5 bg-gradient-to-b from-transparent via-white/10 to-transparent animate-scanline" />
+                )}
 
                 {/* Top Header Row */}
                 <div className={`relative z-20 flex justify-between items-center ${templateConfig.headerBg} p-2 -mx-5 -mt-5 mb-3 px-5`}>
                     <div className="flex items-center gap-2">
                         <div
-                            className="w-5 h-5 flex items-center justify-center font-bold text-black text-[10px] clip-slanted"
+                            className="w-5 h-5 flex items-center justify-center font-bold text-black text-[10px] clip-slanted shrink-0"
                             style={{ backgroundColor: templateConfig.accentColor }}
                         >
                             HH
@@ -55,7 +70,7 @@ export default function CardPreview() {
                         </div>
                     </div>
 
-                    <div className={`text-[8px] font-mono font-bold py-0.5 px-2 uppercase border ${templateConfig.badgeClass}`}>
+                    <div className={`text-[8px] font-mono font-bold py-0.5 px-2 uppercase border shrink-0 ${templateConfig.badgeClass}`}>
                         {templateConfig.badge}
                     </div>
                 </div>
@@ -66,10 +81,10 @@ export default function CardPreview() {
                     {/* Corner Crosshair Accents */}
                     {templateConfig.cornerAccents && (
                         <>
-                            <div className="absolute top-2 left-2 text-[9px] font-mono opacity-60" style={{ color: templateConfig.accentColor }}>+</div>
-                            <div className="absolute top-2 right-2 text-[9px] font-mono opacity-60" style={{ color: templateConfig.accentColor }}>+</div>
-                            <div className="absolute bottom-2 left-2 text-[9px] font-mono opacity-60" style={{ color: templateConfig.accentColor }}>+</div>
-                            <div className="absolute bottom-2 right-2 text-[9px] font-mono opacity-60" style={{ color: templateConfig.accentColor }}>+</div>
+                            <div className="absolute top-2 left-2 text-[9px] font-mono opacity-60 pointer-events-none" style={{ color: templateConfig.accentColor }}>+</div>
+                            <div className="absolute top-2 right-2 text-[9px] font-mono opacity-60 pointer-events-none" style={{ color: templateConfig.accentColor }}>+</div>
+                            <div className="absolute bottom-2 left-2 text-[9px] font-mono opacity-60 pointer-events-none" style={{ color: templateConfig.accentColor }}>+</div>
+                            <div className="absolute bottom-2 right-2 text-[9px] font-mono opacity-60 pointer-events-none" style={{ color: templateConfig.accentColor }}>+</div>
                         </>
                     )}
 
@@ -96,14 +111,14 @@ export default function CardPreview() {
                         <div className="absolute bottom-2 left-2 right-2 z-30">
                             {teamValidation.isValid ? (
                                 <div className="bg-black/90 backdrop-blur-md border border-[#00F5FF]/60 px-2 py-1 flex items-center justify-between text-[8px] font-mono text-[#00F5FF]">
-                                    <span className="font-extrabold uppercase truncate">{selectedTeam.name}</span>
+                                    <span className="font-extrabold uppercase truncate mr-1">{selectedTeam.name}</span>
                                     <span className="flex items-center gap-1 font-bold shrink-0">
                                         <ShieldCheck className="w-3 h-3" /> VERIFIED
                                     </span>
                                 </div>
                             ) : (
                                 <div className="bg-black/90 backdrop-blur-md border border-[#FF2E55] px-2 py-1 flex items-center justify-between text-[8px] font-mono text-[#FF2E55]">
-                                    <span className="font-bold uppercase truncate">{selectedTeam.name}</span>
+                                    <span className="font-bold uppercase truncate mr-1">{selectedTeam.name}</span>
                                     <span className="flex items-center gap-1 font-bold shrink-0">
                                         <AlertTriangle className="w-3 h-3" /> UNVERIFIED
                                     </span>
@@ -117,33 +132,33 @@ export default function CardPreview() {
                 <div className="relative z-20 flex flex-col justify-end text-left pt-2">
 
                     {/* Builder Aura / Class Title */}
-                    <div className="flex items-center gap-1 mb-1">
+                    <div className="flex items-center gap-1 mb-1 truncate">
                         <Sparkles className="w-3 h-3 shrink-0" style={{ color: templateConfig.accentColor }} />
-                        <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${templateConfig.classColor}`}>
+                        <span className={`text-[10px] font-mono font-bold uppercase tracking-wider truncate ${templateConfig.classColor}`}>
                             {builderTitle}
                         </span>
                     </div>
 
-                    {/* Name */}
-                    <div className={`text-xl sm:text-2xl leading-none uppercase tracking-wide truncate ${templateConfig.nameColor}`}>
+                    {/* Name with Dynamic Scaling */}
+                    <div className={`font-display font-black uppercase tracking-wide break-words line-clamp-2 ${templateConfig.nameColor} ${getNameFontSize(displayName)}`}>
                         {displayName}
                     </div>
 
-                    {/* Stack / Role */}
-                    <div className="text-[10px] font-mono text-gray-400 uppercase tracking-wider truncate mt-1">
+                    {/* Stack / Role with Dynamic Scaling */}
+                    <div className={`font-mono text-gray-400 uppercase tracking-wider mt-1 break-words line-clamp-2 ${getRoleFontSize(displayRole)}`}>
                         {displayRole}
                     </div>
 
                     {/* Bottom Metadata Bar */}
                     <div className="flex justify-between items-end mt-3 pt-2 border-t border-white/10 text-[8px] font-mono">
-                        <div>
+                        <div className="max-w-[60%]">
                             <span className="text-gray-500 block leading-tight uppercase">MODE</span>
-                            <span className="text-white font-bold block uppercase mt-0.5">
+                            <span className="text-white font-bold block uppercase mt-0.5 truncate">
                                 {teamMode === 'team' && teamValidation.isValid ? selectedTeam.name : 'SOLO BUILDER'}
                             </span>
                         </div>
 
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                             <span className="text-gray-500 block leading-tight uppercase">ID CODE</span>
                             <span className="font-bold block uppercase mt-0.5" style={{ color: templateConfig.accentColor }}>
                                 {builderId}
@@ -156,19 +171,23 @@ export default function CardPreview() {
                 {/* Decorative side brackets */}
                 {templateConfig.cornerAccents && (
                     <>
-                        <div className="absolute top-1/2 -right-[1px] -translate-y-1/2 w-[3px] h-10" style={{ backgroundColor: templateConfig.accentColor }} />
-                        <div className="absolute top-1/2 -left-[1px] -translate-y-1/2 w-[3px] h-10 bg-white/20" />
+                        <div className="absolute top-1/2 -right-[1px] -translate-y-1/2 w-[3px] h-10 pointer-events-none" style={{ backgroundColor: templateConfig.accentColor }} />
+                        <div className="absolute top-1/2 -left-[1px] -translate-y-1/2 w-[3px] h-10 bg-white/20 pointer-events-none" />
                     </>
                 )}
 
             </div>
 
             {/* Sub-preview status */}
-            <div className="mt-3 flex items-center justify-between w-full max-w-[340px] text-[9px] font-mono text-gray-500 px-1">
-                <span>PREVIEW MODE // REALTIME</span>
-                <span className="text-sand font-bold uppercase">{templateConfig.name} TEMPLATE</span>
-            </div>
+            {!isExportMode && (
+                <div className="mt-3 flex items-center justify-between w-full max-w-[340px] text-[9px] font-mono text-gray-500 px-1">
+                    <span>PREVIEW MODE // REALTIME</span>
+                    <span className="text-sand font-bold uppercase">{templateConfig.name} TEMPLATE</span>
+                </div>
+            )}
 
         </div>
     );
-}
+});
+
+export default CardPreview;
