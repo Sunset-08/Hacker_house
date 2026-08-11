@@ -1,24 +1,23 @@
-import { renderCard } from '../../lib/cardRenderer.js';
+import { renderCard, getTemplateDimensions } from '../../lib/cardRenderer.js';
 
 function buildXCaption(state) {
   const cls = state.builderClass || 'THE BUILDER';
-  const nm = state.name ? ` ${state.name}` : '';
   return encodeURIComponent(
     `Built my HH Goa 2026 Builder ID.\n\nApparently I'm ${cls}.\n\n#FrameInGoa #HackerHouseGoa`
   );
 }
 
-function buildLinkedInCaption(state) {
-  const nm = state.name ? `${state.name} · ` : '';
+function buildLinkedInCaption() {
   return encodeURIComponent(
-    `${nm}Hacker House Goa 2026 — 28–31 October, Goa India.\n\nBuilding in Goa with the best founders, hackers and makers in the country.\n\n#HackerHouseGoa #FrameInGoa`
+    `Hacker House Goa 2026 — 28–31 October, Goa India.\n\nBuilding in Goa with the best founders, hackers and makers.\n\n#HackerHouseGoa #FrameInGoa`
   );
 }
 
 export default function GeneratorActions({ state, onGenerate, status }) {
   async function handleDownload() {
+    const dims = getTemplateDimensions(state.mode);
     const canvas = document.createElement('canvas');
-    await renderCard(canvas, state, { width: 1200, height: 675 });
+    await renderCard(canvas, state, dims);
     const a = document.createElement('a');
     a.download = `HH-Goa-Builder-ID-${(state.name || 'Builder').replace(/\s+/g, '-')}.png`;
     a.href = canvas.toDataURL('image/png', 1.0);

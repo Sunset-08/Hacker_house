@@ -136,82 +136,103 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   PHOTO UPLOADER
+   PHOTO UPLOADER (new — large portrait-aware)
 ══════════════════════════════════════════════════════════ */
-.uploader {
-  border: 2px dashed rgba(240,199,42,0.35);
-  border-radius: 4px;
-  min-height: 140px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-.uploader:hover,
-.uploader--drag { border-color: var(--hh-yellow); background: rgba(240,199,42,0.05); }
-.uploader--has-photo { border-style: solid; border-color: rgba(240,199,42,0.4); cursor: default; }
+.uploader-wrap { width: 100%; }
 
-.uploader__state {
+/* Empty drop zone */
+.uploader-drop {
+  border: 2px dashed rgba(240,199,42,0.35);
+  border-radius: 6px;
+  padding: var(--space-10) var(--space-6);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
   text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: default;
+  min-height: 260px;
+  justify-content: center;
 }
+.uploader-drop--drag { border-color: var(--hh-yellow); background: rgba(240,199,42,0.06); }
+.uploader-drop--loading { opacity: 0.7; }
 
-.uploader__icon {
-  font-size: 1.8rem;
-  color: var(--hh-yellow);
+.uploader-drop__icon {
+  font-size: 2.4rem;
   line-height: 1;
+  color: var(--hh-yellow);
+  margin-bottom: var(--space-1);
 }
-
-.uploader__label {
+.uploader-drop__title {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   letter-spacing: 0.14em;
   color: var(--hh-cream);
 }
-
-.uploader__sub {
+.uploader-drop__sub {
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
 }
-
-.uploader__btn {
-  margin-top: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--hh-green);
-  background: var(--hh-yellow);
-  padding: 8px 18px;
-  border-radius: 2px;
-  transition: background 0.2s;
+.uploader-drop__btns {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
 }
-.uploader__btn:hover { background: var(--hh-pink); color: #fff; }
+.uploader-drop__btn {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  padding: 12px 22px;
+  border-radius: 3px;
+  transition: all 0.18s;
+}
+.uploader-drop__btn--primary {
+  background: var(--hh-yellow);
+  color: var(--hh-green);
+  border: 2px solid var(--hh-yellow);
+}
+.uploader-drop__btn--primary:hover { background: var(--hh-pink); border-color: var(--hh-pink); color: #fff; }
+.uploader-drop__btn--secondary {
+  background: transparent;
+  color: var(--hh-cream);
+  border: 2px solid rgba(240,199,42,0.35);
+}
+.uploader-drop__btn--secondary:hover { border-color: var(--hh-yellow); }
+.uploader-drop__drag-hint {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(245,240,220,0.25);
+  letter-spacing: 0.08em;
+  margin-top: var(--space-1);
+}
 
-.uploader__preview {
+/* Photo preview state */
+.uploader-preview {
   position: relative;
   width: 100%;
-  height: 160px;
+  height: 260px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid rgba(240,199,42,0.4);
 }
-.uploader__thumb {
+.uploader-preview__img {
   width: 100%;
-  height: 160px;
+  height: 260px;
   object-fit: cover;
   object-position: center top;
   display: block;
 }
-.uploader__preview-overlay {
+.uploader-preview__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(12,74,30,0.6);
+  background: rgba(12,74,30,0.65);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -220,18 +241,29 @@
   opacity: 0;
   transition: opacity 0.2s;
 }
-.uploader__preview:hover .uploader__preview-overlay { opacity: 1; }
-.uploader__change-btn {
+.uploader-preview:hover .uploader-preview__overlay { opacity: 1; }
+.uploader-preview__label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--hh-cream);
+}
+.uploader-preview__actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; }
+.uploader-preview__btn {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--hh-green);
-  background: var(--hh-yellow);
-  padding: 6px 14px;
+  letter-spacing: 0.12em;
+  padding: 8px 16px;
   border-radius: 2px;
+  background: var(--hh-yellow);
+  color: var(--hh-green);
+  transition: background 0.18s;
 }
-.uploader__change-btn:hover { background: var(--hh-pink); color: #fff; }
+.uploader-preview__btn:hover { background: var(--hh-pink); color: #fff; }
+.uploader-preview__btn--alt { background: rgba(255,255,255,0.15); color: var(--hh-cream); }
+.uploader-preview__btn--alt:hover { background: rgba(255,255,255,0.25); }
 
 /* ══════════════════════════════════════════════════════════
    MODE SELECTOR
@@ -449,7 +481,7 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 16/9;
+  aspect-ratio: 2 / 3; /* portrait ID card */
 }
 
 .card-preview__overlay {
@@ -612,4 +644,133 @@
   .mode-selector__grid { grid-template-columns: 1fr; }
   .gen-actions__secondary { flex-direction: column; }
   .theme-selector__list { gap: var(--space-1); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   HANGING TAG
+══════════════════════════════════════════════════════════ */
+@keyframes tagSway {
+  0%, 100% { transform: rotate(-2.2deg); }
+  50%       { transform: rotate(2.2deg); }
+}
+
+.card-tag-area {
+  display: flex;
+  justify-content: center;
+  height: 54px;
+  position: relative;
+  /* Allow string to overlap card top */
+  overflow: visible;
+  z-index: 2;
+}
+
+.card-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: tagSway 5s ease-in-out infinite;
+  position: absolute;
+  top: 0;
+}
+
+.card-tag__badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+  color: var(--hh-green);
+  background: var(--hh-cream);
+  border: 1px solid rgba(240,199,42,0.5);
+  padding: 3px 9px;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+/* The loop that threads through the punch hole */
+.card-tag__loop {
+  width: 14px;
+  height: 7px;
+  border: 1.5px solid rgba(240,199,42,0.65);
+  border-bottom: none;
+  border-radius: 7px 7px 0 0;
+  margin-top: 1px;
+}
+
+/* String from loop down to card punch hole */
+.card-tag__string {
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(to bottom, rgba(240,199,42,0.6), rgba(240,199,42,0.2));
+}
+
+/* ══════════════════════════════════════════════════════════
+   3D CARD FLIP
+══════════════════════════════════════════════════════════ */
+.card-flip-outer {
+  perspective: 1400px;
+}
+
+.card-flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.72s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.card-flip-inner--flipped {
+  transform: rotateY(180deg);
+}
+
+.card-flip__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-flip__back {
+  transform: rotateY(180deg);
+}
+
+/* ── Flip button + controls row ──────────────────────────── */
+.card-preview__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-1);
+}
+
+.card-flip-btn {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--hh-yellow);
+  border: 1px solid rgba(240,199,42,0.35);
+  padding: 6px 12px;
+  border-radius: 2px;
+  background: transparent;
+  transition: border-color 0.18s, background 0.18s, color 0.18s;
+  flex-shrink: 0;
+}
+
+.card-flip-btn:hover {
+  border-color: var(--hh-yellow);
+  background: rgba(240,199,42,0.1);
+}
+
+/* Override old hint — now inside controls row */
+.card-preview__controls .card-preview__hint {
+  text-align: left;
+  margin: 0;
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .card-tag-area   { height: 44px; }
+  .card-tag__badge { font-size: 0.44rem; padding: 2px 6px; }
+  .card-tag__string { height: 14px; }
 }
