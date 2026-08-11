@@ -1,0 +1,147 @@
+/* ============================================================
+   HH GOA 2026 — DESIGN SYSTEM
+   Color tokens, typography, resets, animations
+   ============================================================ */
+
+/* --- Design Tokens ---------------------------------------- */
+:root {
+  /* Core palette */
+  --hh-green:        #0c4a1e;
+  --hh-green-mid:    #1a6b30;
+  --hh-green-light:  #2d8f4a;
+  --hh-yellow:       #f0c72a;
+  --hh-yellow-dark:  #c9a51e;
+  --hh-pink:         #ff2e8b;
+  --hh-pink-dark:    #d41e70;
+  --hh-cream:        #f5f0dc;
+  --hh-cream-dark:   #e8e0c0;
+  --hh-teal:         #1a7a6e;
+  --hh-black:        #0a0f0d;
+
+  /* Text */
+  --text-primary:    var(--hh-yellow);
+  --text-secondary:  var(--hh-cream);
+  --text-accent:     var(--hh-pink);
+  --text-muted:      rgba(245, 240, 220, 0.55);
+
+  /* Surface */
+  --surface-1:       var(--hh-green);
+  --surface-2:       var(--hh-green-mid);
+  --border-color:    rgba(240, 199, 42, 0.3);
+  --border-strong:   var(--hh-yellow);
+
+  /* Typography */
+  --font-editorial:  'Playfair Display', 'Georgia', serif;
+  --font-mono:       'Space Mono', 'Courier New', monospace;
+  --font-sans:       'DM Sans', system-ui, sans-serif;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Borders */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+/* --- Reset ------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--hh-green);
+  color: var(--text-secondary);
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+
+/* --- Utilities --------------------------------------------- */
+.font-editorial { font-family: var(--font-editorial); }
+.font-mono      { font-family: var(--font-mono); }
+.font-sans      { font-family: var(--font-sans); }
+
+.text-yellow    { color: var(--hh-yellow); }
+.text-pink      { color: var(--hh-pink); }
+.text-cream     { color: var(--hh-cream); }
+.text-muted     { color: var(--text-muted); }
+
+.border-yellow  { border: 1px solid var(--hh-yellow); }
+.border-pink    { border: 1px solid var(--hh-pink); }
+
+/* --- Grain texture overlay --------------------------------- */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* --- Global keyframes -------------------------------------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes blinkCaret {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes glitch {
+  0%   { clip-path: inset(0 0 95% 0); transform: skewX(0deg); }
+  5%   { clip-path: inset(30% 0 60% 0); transform: skewX(-3deg); }
+  10%  { clip-path: inset(65% 0 20% 0); transform: skewX(3deg); }
+  15%  { clip-path: inset(80% 0 5% 0); transform: skewX(0deg); }
+  20%  { clip-path: inset(0 0 95% 0); }
+  100% { clip-path: inset(0 0 95% 0); }
+}
+
+@keyframes scanlines {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
