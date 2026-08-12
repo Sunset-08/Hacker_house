@@ -1,31 +1,38 @@
 const MODES = [
   {
-    id: 'modern',
-    label: 'MODE 02',
-    name: 'MODERN',
-    desc: 'Clean. Editorial. Timeless.',
+    id: 'hacker-house',
+    label: 'STYLE 01',
+    name: 'HACKER HOUSE',
+    desc: 'Goa hacker aesthetic',
     badge: '✦',
   },
   {
-    id: 'goan',
-    label: 'MODE 01',
-    name: 'GOAN ART',
-    desc: 'Arch frames. Tile borders. Coastal art.',
+    id: 'beach',
+    label: 'STYLE 02',
+    name: 'BEACH',
+    desc: 'Coastal Goa experience',
     badge: '◉',
   },
   {
-    id: 'archive',
-    label: 'MODE 03',
-    name: 'ARCHIVE',
-    desc: 'Classified dossier. Builder clearance.',
-    badge: '▣',
+    id: 'minimal',
+    label: 'STYLE 03',
+    name: 'MINIMAL',
+    desc: 'Clean modern identity',
+    badge: '⚡',
+  },
+  {
+    id: 'boarding-pass',
+    label: 'STYLE 04',
+    name: 'BOARDING PASS',
+    desc: 'Travel / boarding pass aesthetic',
+    badge: '✈',
   },
 ];
 
 export default function ModeSelector({ mode, onChange }) {
   return (
     <div className="mode-selector">
-      <p className="gen-section-label">SELECT MODE //</p>
+      <p className="gen-section-label">SELECT ID STYLE //</p>
       <div className="mode-selector__grid">
         {MODES.map(m => (
           <button
@@ -45,3 +52,4 @@ export default function ModeSelector({ mode, onChange }) {
     </div>
   );
 }
+

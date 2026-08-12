@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { pickBuilderClass } from '../../lib/builderClasses.js';
 import { generateBuilderId } from '../../lib/canvasUtils.js';
 import { renderCard } from '../../lib/cardRenderer.js';
 
@@ -12,17 +11,17 @@ import BuilderCardPreview from './BuilderCardPreview.jsx';
 import GeneratorActions from './GeneratorActions.jsx';
 
 function initState() {
-  const cls = pickBuilderClass();
   return {
     photo: null,
-    mode: 'modern',
+    photoCrop: { zoom: 1, offsetX: 0, offsetY: 0 },
+    mode: 'hacker-house',
     theme: 'classic',
     name: '',
     stack: '',
     bio: '',
     team: '',
-    builderClass: cls,
-    builderId: generateBuilderId(''),
+    builderClass: '',
+    builderId: '',
   };
 }
 
@@ -35,13 +34,18 @@ export default function BuilderGenerator() {
     setState(prev => {
       const next = { ...prev, [key]: value };
       // Refresh builderId if name changed
-      if (key === 'name') next.builderId = generateBuilderId(value);
+      if (key === 'name') {
+        next.builderId = value.trim() ? generateBuilderId(value) : '';
+      }
       return next;
     });
   }, []);
 
-  const updateMany = useCallback((patch) => {
-    setState(prev => ({ ...prev, ...patch }));
+  const updateCrop = useCallback((patch) => {
+    setState(prev => ({
+      ...prev,
+      photoCrop: { ...prev.photoCrop, ...patch }
+    }));
   }, []);
 
   async function handleGenerate() {
@@ -90,7 +94,9 @@ export default function BuilderGenerator() {
 
           <PhotoUploader
             photo={state.photo}
+            photoCrop={state.photoCrop}
             onPhoto={img => update('photo', img)}
+            onCropChange={updateCrop}
             onError={msg => setError(msg)}
           />
 

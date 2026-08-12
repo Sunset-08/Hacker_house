@@ -1,82 +1,51 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
-import { renderCard, renderCardBack, getTemplateDimensions } from '../../lib/cardRenderer.js';
+/**
+ * BuilderCardPreview.jsx
+ * ============================================================
+ * Live preview panel for the ID card generator.
+ *
+ * Uses the HTML/CSS-based TemplateRenderer for the live preview —
+ * pixel-perfect, responsive, and zero drift.
+ *
+ * The canvas-based renderCard / renderCardBack is kept for
+ * the DOWNLOAD path in GeneratorActions.jsx.
+ */
+import { useState, useEffect } from 'react';
+import TemplateRenderer from './TemplateRenderer.jsx';
 
 export default function BuilderCardPreview({ state }) {
-  const frontRef    = useRef(null);
-  const backRef     = useRef(null);
-  const renderIdRef = useRef(0);
-  const [rendering, setRendering] = useState(false);
-  const [flipped, setFlipped]     = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
-  const redraw = useCallback(async () => {
-    const id = ++renderIdRef.current;
-    setRendering(true);
-    try {
-      const dims = getTemplateDimensions(state.mode);
-      const opts = { width: dims.width, height: dims.height };
-      await Promise.all([
-        frontRef.current && renderCard(frontRef.current, state, opts),
-        backRef.current  && renderCardBack(backRef.current, state, opts),
-      ]);
-    } catch (e) {
-      console.error('Card render error:', e);
-    } finally {
-      if (renderIdRef.current === id) setRendering(false);
-    }
-  }, [state]);
-
-  useEffect(() => { redraw(); }, [redraw]);
+  // Reset flip state when the template changes
+  useEffect(() => {
+    setFlipped(false);
+  }, [state.mode]);
 
   return (
     <div className="card-preview">
 
-      {/* Hanging tag */}
-      <div className="card-tag-area" aria-hidden="true">
-        <div className="card-tag">
-          <div className="card-tag__badge">HH GOA · 2026</div>
-          <div className="card-tag__loop" />
-          <div className="card-tag__string" />
-        </div>
+      {/* Header */}
+      <div className="card-preview__header">
+        <span className="card-preview__label">LIVE PREVIEW //</span>
+        <span className="card-preview__status-dot">● REALTIME</span>
       </div>
 
-      {/* 3D flip container */}
-      <div className="card-flip-outer">
-        <div className={`card-flip-inner${flipped ? ' card-flip-inner--flipped' : ''}`}>
-
-          {/* FRONT */}
-          <div className="card-flip__face card-flip__front">
-            <div className="card-preview__frame">
-              <canvas ref={frontRef} className="card-preview__canvas" aria-label="Builder ID — front" />
-              {rendering && (
-                <div className="card-preview__overlay">
-                  <span className="card-preview__status">COMPOSING...</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* BACK */}
-          <div className="card-flip__face card-flip__back">
-            <div className="card-preview__frame">
-              <canvas ref={backRef} className="card-preview__canvas" aria-label="Builder ID — back" />
-            </div>
-          </div>
-
-        </div>
-      </div>
+      {/* Card face (TemplateRenderer now handles the 3D flip internally) */}
+      <TemplateRenderer state={state} flipped={flipped} />
 
       {/* Controls */}
       <div className="card-preview__controls">
-        <button className="card-flip-btn" id="flip-card-btn"
+        <button
+          className="card-flip-btn"
+          id="flip-card-btn"
           onClick={() => setFlipped(f => !f)}
-          aria-label={flipped ? 'Show card front' : 'Flip card to see back'}>
-          {flipped ? '← FRONT' : 'FLIP ID ↻'}
+          aria-label={flipped ? 'Show card front' : 'Flip card to see back'}
+        >
+          {flipped ? '← SHOW FRONT' : 'FLIP CARD ↻'}
         </button>
         <p className="card-preview__hint">
-          {flipped ? 'BACK — builder file' : 'LIVE PREVIEW — updates as you type'}
+          {flipped ? 'BACK — BUILDER CREDENTIAL' : 'FRONT — EVENT IDENTITY PASS'}
         </p>
       </div>
-
     </div>
   );
 }

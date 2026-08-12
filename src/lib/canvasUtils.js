@@ -3,45 +3,58 @@
  * Import these in template render functions for consistent quality.
  */
 
-// ── Image fitting ─────────────────────────────────────────────────────────────
+// ── Image fitting with Photo Crop Support ─────────────────────────────────────
 
-/** Cover-fit image into rect. topBias=0 is centred, 0.2 favours face area */
-export function drawImageCover(ctx, img, x, y, w, h, topBias = 0.2) {
+/**
+ * Cover-fit image into rect with user crop controls.
+ */
+export function drawImageCover(ctx, img, x, y, w, h, topBias = 0.2, crop = {}) {
   if (!img) return;
+  const zoom = crop.zoom || 1;
+  const offX = crop.offsetX || 0;
+  const offY = crop.offsetY || 0;
+
   const iA = img.width / img.height;
   const tA = w / h;
   let sx, sy, sw, sh;
+
   if (iA > tA) {
-    sh = img.height; sw = sh * tA;
-    sx = (img.width - sw) / 2; sy = 0;
+    sh = img.height / zoom;
+    sw = sh * tA;
+    const maxSx = img.width - sw;
+    sx = (img.width - sw) / 2 + offX * maxSx;
+    sy = (img.height - sh) * topBias + offY * (img.height - sh);
   } else {
-    sw = img.width; sh = sw / tA;
-    sx = 0; sy = Math.max(0, (img.height - sh) * topBias);
+    sw = img.width / zoom;
+    sh = sw / tA;
+    const maxSy = img.height - sh;
+    sx = (img.width - sw) / 2 + offX * (img.width - sw);
+    sy = Math.max(0, (img.height - sh) * topBias + offY * maxSy);
   }
+
+  // Clamp source bounds to avoid drawing empty space
+  sw = Math.min(img.width, Math.max(10, sw));
+  sh = Math.min(img.height, Math.max(10, sh));
+  sx = Math.max(0, Math.min(img.width - sw, sx));
+  sy = Math.max(0, Math.min(img.height - sh, sy));
+
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
 /** Circular photo mask */
-export function drawCirclePhoto(ctx, img, cx, cy, r) {
+export function drawCirclePhoto(ctx, img, cx, cy, r, crop = {}) {
+  if (!img) return; // Do not draw placeholder circle/dark fill if no image
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.clip();
-  if (img) drawImageCover(ctx, img, cx - r, cy - r, r * 2, r * 2, 0.15);
-  else {
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-  }
+  drawImageCover(ctx, img, cx - r, cy - r, r * 2, r * 2, 0.15, crop);
   ctx.restore();
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
 }
 
 /** Arch-clipped photo (semicircle top + rectangle body) */
-export function drawArchPhoto(ctx, img, x, y, w, h) {
+export function drawArchPhoto(ctx, img, x, y, w, h, crop = {}) {
+  if (!img) return; // Do not draw dark arch background or placeholder text if no image
   const r = w / 2;
   ctx.save();
   ctx.beginPath();
@@ -51,15 +64,21 @@ export function drawArchPhoto(ctx, img, x, y, w, h) {
   ctx.lineTo(x, y + h);
   ctx.closePath();
   ctx.clip();
-  if (img) drawImageCover(ctx, img, x, y, w, h, 0.15);
-  else {
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.fillRect(x, y, w, h);
-  }
+  drawImageCover(ctx, img, x, y, w, h, 0.15, crop);
   ctx.restore();
 }
 
-// ── Text ──────────────────────────────────────────────────────────────────────
+/** Rounded rectangle photo mask */
+export function drawRectPhoto(ctx, img, x, y, w, h, radius = 12, crop = {}) {
+  if (!img) return; // Do not draw dark rect background or placeholder text if no image
+  ctx.save();
+  roundRect(ctx, x, y, w, h, radius);
+  ctx.clip();
+  drawImageCover(ctx, img, x, y, w, h, 0.15, crop);
+  ctx.restore();
+}
+
+// ── Text & Typography Auto-Fitting ────────────────────────────────────────────
 
 /** Wrap text to maxWidth, return array of line strings */
 export function wrapText(ctx, text, maxWidth) {
@@ -75,13 +94,18 @@ export function wrapText(ctx, text, maxWidth) {
   return lines;
 }
 
-/** Draw text, auto-shrink font size if too wide */
+/** Draw text, auto-shrink font size if too wide.
+ *  Accepts full CSS font strings like 'bold 52px "Space Mono"' or '52px "Space Mono"'.
+ */
 export function drawFitText(ctx, text, x, y, maxW, font, fillStyle) {
-  let size = parseInt(font);
-  const family = font.replace(/^\d+px\s*/, '');
+  // Extract numeric px size from strings like 'bold 52px ...' or '900 36px ...'
+  const sizeMatch = font.match(/(\d+)px/);
+  let size = sizeMatch ? parseInt(sizeMatch[1], 10) : 24;
+  // Extract the weight+family portion, e.g. 'bold "Space Mono"' or '900 "Space Mono"'
+  const weightAndFamily = font.replace(/\d+px\s*/, '');
   ctx.fillStyle = fillStyle;
   while (size > 10) {
-    ctx.font = `${size}px ${family}`;
+    ctx.font = `${size}px ${weightAndFamily}`;
     if (ctx.measureText(text).width <= maxW) break;
     size -= 2;
   }
@@ -112,83 +136,12 @@ export function drawCardBackground(ctx, w, h, color, radius = 28) {
   ctx.fill();
 }
 
-// ── Decorative ────────────────────────────────────────────────────────────────
-
-/** Portrait azulejo tile strip */
-export function drawTileStrip(ctx, x, y, w, h, colors) {
-  const sz = h;
-  for (let tx = x; tx < x + w; tx += sz) {
-    ctx.fillStyle = colors[0]; ctx.fillRect(tx, y, sz, sz);
-    ctx.fillStyle = colors[1];
-    const q = sz / 4;
-    ctx.fillRect(tx + q, y, q * 2, sz);
-    ctx.fillRect(tx, y + q, sz, q * 2);
-    ctx.fillStyle = colors[0];
-    ctx.fillRect(tx, y, q, q);
-    ctx.fillRect(tx + q * 3, y, q, q);
-    ctx.fillRect(tx, y + q * 3, q, q);
-    ctx.fillRect(tx + q * 3, y + q * 3, q, q);
-    ctx.fillStyle = colors[2] || colors[1];
-    const c = sz / 2;
-    ctx.beginPath();
-    ctx.moveTo(tx + c, y + q); ctx.lineTo(tx + q * 3, y + c);
-    ctx.lineTo(tx + c, y + q * 3); ctx.lineTo(tx + q, y + c);
-    ctx.closePath(); ctx.fill();
-  }
-}
-
-/** Draw a palm tree silhouette */
-export function drawPalm(ctx, x, groundY, h, color) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(x - 5, groundY);
-  ctx.quadraticCurveTo(x + 8, groundY - h * 0.5, x, groundY - h);
-  ctx.quadraticCurveTo(x - 8, groundY - h * 0.5, x + 5, groundY);
-  ctx.fill();
-  const fronds = [[-50,-20],[50,-15],[-30,-40],[30,-45],[0,-55]];
-  for (const [dx, dy] of fronds) {
-    ctx.beginPath();
-    ctx.moveTo(x, groundY - h);
-    ctx.quadraticCurveTo(x + dx * 0.5, groundY - h + dy * 0.5 - 10, x + dx, groundY - h + dy);
-    ctx.lineWidth = 4; ctx.strokeStyle = color; ctx.stroke();
-  }
-}
-
-/** Graph-paper grid texture */
-export function drawGrid(ctx, w, h, spacing, color) {
-  ctx.strokeStyle = color; ctx.lineWidth = 0.5;
-  for (let x = 0; x < w; x += spacing) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-  }
-  for (let y = 0; y < h; y += spacing) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-  }
-}
-
-/** Diagonal stamp text (VERIFIED, BUILDER, etc.) */
-export function drawStamp(ctx, cx, cy, text, color, angle = -0.4, size = 72) {
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(angle);
-  ctx.font = `900 ${size}px "Playfair Display", serif`;
-  ctx.strokeStyle = color; ctx.lineWidth = 3;
-  ctx.globalAlpha = 0.15;
-  ctx.strokeText(text, -ctx.measureText(text).width / 2, 0);
-  ctx.globalAlpha = 1;
-  ctx.restore();
-}
-
 // ── Lanyard Slot (portrait format) ───────────────────────────────────────────
 
-/**
- * Draw the physical punch/lanyard slot at top-center.
- * Portrait cards use an elongated capsule shape, not a circle.
- */
 export function drawLanyardSlot(ctx, cardW, y = 22) {
   const slotW = 56, slotH = 20, r = slotH / 2;
   const sx = (cardW - slotW) / 2;
 
-  // Outer rim with shadow
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,0.55)';
   ctx.shadowBlur = 5;
@@ -197,29 +150,26 @@ export function drawLanyardSlot(ctx, cardW, y = 22) {
   ctx.fill();
   ctx.restore();
 
-  // Inner dark hole
   roundRect(ctx, sx, y, slotW, slotH, r);
   ctx.fillStyle = 'rgba(0,0,0,0.78)';
   ctx.fill();
 
-  // Metal rim
   roundRect(ctx, sx, y, slotW, slotH, r);
   ctx.strokeStyle = 'rgba(255,255,255,0.22)';
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
-  // Specular glint top-left
   ctx.beginPath();
   ctx.arc(sx + r + 3, y + 4, 3, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.fill();
 }
 
-// ── Builder ID ────────────────────────────────────────────────────────────────
+// ── Builder ID Generator ──────────────────────────────────────────────────────
 
 export function generateBuilderId(name) {
-  const seed = (name || 'ANON').toUpperCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const hex = (seed * 2654435761 >>> 0).toString(16).toUpperCase().padStart(8, '0');
-  const ts = Date.now().toString(36).slice(-4).toUpperCase();
-  return `HHG-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${ts}`;
+  const cleanName = (name || 'BUILDER').toUpperCase().replace(/[^A-Z]/g, '');
+  const slug = cleanName.slice(0, 7) || 'BUILDER';
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `HH26-${slug}-${num}`;
 }

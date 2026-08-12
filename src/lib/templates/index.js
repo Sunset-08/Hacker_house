@@ -4,14 +4,16 @@
  *
  * Each template must export: { id, name, desc, badge, dimensions, render, renderBack }
  */
-import goanTemplate  from './goanTemplate.js';
-import modernTemplate from './modernTemplate.js';
-import archiveTemplate from './archiveTemplate.js';
+import hackerHouseTemplate  from './hackerHouseTemplate.js';
+import beachTemplate        from './beachTemplate.js';
+import minimalTemplate      from './minimalTemplate.js';
+import boardingPassTemplate from './boardingPassTemplate.js';
 
 export const TEMPLATES = {
-  goan:    goanTemplate,
-  modern:  modernTemplate,
-  archive: archiveTemplate,
+  'hacker-house':  hackerHouseTemplate,
+  'beach':         beachTemplate,
+  'minimal':       minimalTemplate,
+  'boarding-pass': boardingPassTemplate,
 };
 
 export const TEMPLATE_LIST = Object.values(TEMPLATES);
