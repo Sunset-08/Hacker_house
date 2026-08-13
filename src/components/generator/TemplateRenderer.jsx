@@ -163,12 +163,7 @@ export default function TemplateRenderer({ state, flipped = false }) {
             </div>
           )}
 
-          {/* Layer 7: bio */}
-          {state.bio?.trim() && coords.bio && (
-            <div className={`tr-slot tr-text${dbg}`} style={textStyle(coords.bio)} {...dbgAttr('bio', coords.bio)}>
-              <span>{state.bio.trim()}</span>
-            </div>
-          )}
+
 
           {/* Layer 8: QR code */}
           {qrDataUrl && (

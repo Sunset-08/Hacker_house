@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { generateBuilderId } from '../../lib/canvasUtils.js';
-import { renderCard } from '../../lib/cardRenderer.js';
+import { renderCard, getTemplateDimensions } from '../../lib/cardRenderer.js';
 
 import PhotoUploader from './PhotoUploader.jsx';
 import ModeSelector from './ModeSelector.jsx';
@@ -18,8 +18,6 @@ function initState() {
 
     name: '',
     stack: '',
-    bio: '',
-    team: '',
     builderClass: '',
     builderId: '',
   };
@@ -52,15 +50,17 @@ export default function BuilderGenerator() {
     setStatus('generating');
     setError(null);
     try {
-      // Final render at full res to confirm it works (preview already showing)
+      // Validation render at the template's native resolution
+      const dims = getTemplateDimensions(state.mode);
       const canvas = document.createElement('canvas');
-      await renderCard(canvas, state, { width: 1200, height: 675 });
+      await renderCard(canvas, state, { width: dims.width, height: dims.height });
       setStatus('done');
     } catch (e) {
       setError('WELP. THAT BROKE. Try again.');
       setStatus('idle');
     }
   }
+
 
   return (
     <section className="builder-generator" id="generator" aria-label="Builder ID Generator">

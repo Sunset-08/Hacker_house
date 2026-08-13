@@ -121,17 +121,7 @@ const hackerHouse = {
     color: '#0C4A1E',
     align: 'left'
   },
-  bio: {
-    x: 152,
-    y: 1155,
-    w: 720,
-    h: 60,
-    fontFamily: 'var(--font-editorial)',
-    fontSize: 22,
-    fontWeight: 400,
-    color: 'rgba(12, 74, 30, 0.8)',
-    align: 'center'
-  },
+
   qr: {
     x: 395,
     y: 1240,

@@ -16,7 +16,7 @@
  */
 import { TEMPLATE_CONFIGS } from './templateConfig.js';
 import { getCleanTemplateCanvas } from './templateUtils.js';
-import { drawRectPhoto, drawFitText, roundRect, drawCardBackground, drawLanyardSlot, wrapText } from '../canvasUtils.js';
+import { drawRectPhoto, drawFitText, roundRect, drawCardBackground, drawLanyardSlot } from '../canvasUtils.js';
 import { makeQRCanvas, buildQRPayload } from '../qr.js';
 
 const cfg = TEMPLATE_CONFIGS['hacker-house'];
@@ -43,6 +43,7 @@ export default {
     }
 
     ctx.save();
+    ctx.textBaseline = 'middle'; // Match CSS flex vertical centering
 
     // ── LAYER 2: User photo ───────────────────────────────────────────────
     if (photo) {
@@ -78,18 +79,7 @@ export default {
       drawFitText(ctx, builderClass.trim().toUpperCase(), c.x, c.y, c.maxWidth, c.font, c.color);
     }
 
-    // ── LAYER 7: Bio / Quote ──────────────────────────────────────────────
-    if (bio && bio.trim()) {
-      const c = cfg.bioText;
-      ctx.textAlign = c.align;
-      ctx.font = c.font;
-      ctx.fillStyle = c.color;
-      const lines = wrapText(ctx, bio.trim(), c.maxWidth);
-      // Ensure we handle longer bios gracefully (up to 3 lines)
-      lines.slice(0, 3).forEach((line, i) => {
-        ctx.fillText(line, c.x, c.y + i * 26);
-      });
-    }
+
 
     // ── LAYER 8: QR code ─────────────────────────────────────────────────
     if (builderId && builderId.trim()) {

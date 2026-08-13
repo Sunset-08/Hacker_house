@@ -95,17 +95,24 @@ export function wrapText(ctx, text, maxWidth) {
 }
 
 /** Draw text, auto-shrink font size if too wide.
- *  Accepts full CSS font strings like 'bold 52px "Space Mono"' or '52px "Space Mono"'.
+ *  Accepts fontConfig object { family, size, weight, style } OR a CSS font string.
  */
-export function drawFitText(ctx, text, x, y, maxW, font, fillStyle) {
-  // Extract numeric px size from strings like 'bold 52px ...' or '900 36px ...'
-  const sizeMatch = font.match(/(\d+)px/);
-  let size = sizeMatch ? parseInt(sizeMatch[1], 10) : 24;
-  // Extract the weight+family portion, e.g. 'bold "Space Mono"' or '900 "Space Mono"'
-  const weightAndFamily = font.replace(/\d+px\s*/, '');
+export function drawFitText(ctx, text, x, y, maxW, fontConfig, fillStyle) {
+  let size, fontStrFn;
+  
+  if (typeof fontConfig === 'string') {
+    const parts = fontConfig.split(/(\d+)px/);
+    size = parts.length > 1 ? parseInt(parts[1], 10) : 24;
+    fontStrFn = (s) => `${parts[0] || ''}${s}px${parts[2] || ''}`;
+  } else {
+    size = fontConfig.size || 24;
+    const { family, weight, style } = fontConfig;
+    fontStrFn = (s) => `${style === 'italic' ? 'italic ' : ''}${weight} ${s}px ${family}`;
+  }
+  
   ctx.fillStyle = fillStyle;
   while (size > 10) {
-    ctx.font = `${size}px ${weightAndFamily}`;
+    ctx.font = fontStrFn(size);
     if (ctx.measureText(text).width <= maxW) break;
     size -= 2;
   }

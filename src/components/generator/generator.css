@@ -1226,6 +1226,26 @@
   letter-spacing: 0.08em;
 }
 
+.gen-actions__share-msg {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--hh-yellow, #F0C72A);
+  background: rgba(240,199,42,0.08);
+  border: 1px solid rgba(240,199,42,0.2);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin-top: 0.5rem;
+  animation: shareMsg-fade 0.3s ease-out;
+}
+
+@keyframes shareMsg-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════ */

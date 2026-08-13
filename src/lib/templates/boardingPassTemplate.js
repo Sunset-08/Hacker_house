@@ -43,6 +43,7 @@ export default {
     }
 
     ctx.save();
+    ctx.textBaseline = 'middle'; // Match CSS flex vertical centering
 
     // ── LAYER 2: User photo ───────────────────────────────────────────────
     if (photo) {

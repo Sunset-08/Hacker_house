@@ -5,7 +5,19 @@
 import { TEMPLATES, CARD_W, CARD_H } from './templates/index.js';
 
 async function ensureFonts() {
-  if (typeof document !== 'undefined') await document.fonts.ready;
+  if (typeof document !== 'undefined') {
+    await document.fonts.ready;
+    try {
+      // Explicitly trigger loading of specific fonts used in the canvas
+      await Promise.all([
+        document.fonts.load('700 24px "Space Mono"'),
+        document.fonts.load('400 24px "DM Sans"'),
+        document.fonts.load('900 24px "Playfair Display"')
+      ]);
+    } catch (err) {
+      console.warn('Font preloading failed, falling back to document.fonts.ready', err);
+    }
+  }
 }
 
 function getTemplate(mode) {

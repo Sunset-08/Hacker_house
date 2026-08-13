@@ -1,39 +1,65 @@
-import { renderCard, getTemplateDimensions } from '../../lib/cardRenderer.js';
+import { useState } from 'react';
+import { generateBuilderCardBlob } from '../../lib/generateCardBlob.js';
+import { shareBuilderCard, downloadBlob } from '../../lib/share.js';
 
 function buildXCaption(state) {
   const cls = state.builderClass || 'THE BUILDER';
-  return encodeURIComponent(
-    `Built my HH Goa 2026 Builder ID.\n\nApparently I'm ${cls}.\n\n#FrameInGoa #HackerHouseGoa`
-  );
+  return `Built my HH Goa 2026 Builder ID.\n\nApparently I'm ${cls}.\n\n#FrameInGoa #HackerHouseGoa`;
 }
 
 function buildLinkedInCaption() {
-  return encodeURIComponent(
-    `Hacker House Goa 2026 — 28–31 October, Goa India.\n\nBuilding in Goa with the best founders, hackers and makers.\n\n#HackerHouseGoa #FrameInGoa`
-  );
+  return `Hacker House Goa 2026 — 28–31 October, Goa India.\n\nBuilding in Goa with the best founders, hackers and makers.\n\n#HackerHouseGoa #FrameInGoa`;
 }
 
 export default function GeneratorActions({ state, onGenerate, status }) {
+  const [shareMsg, setShareMsg] = useState(null);
+
+  // Clear share message after a few seconds
+  function showShareMsg(msg, durationMs = 4000) {
+    setShareMsg(msg);
+    setTimeout(() => setShareMsg(null), durationMs);
+  }
+
   async function handleDownload() {
-    const dims = getTemplateDimensions(state.mode);
-    const canvas = document.createElement('canvas');
-    await renderCard(canvas, state, dims);
-    const a = document.createElement('a');
-    a.download = `HH-Goa-Builder-ID-${(state.name || 'Builder').replace(/\s+/g, '-')}.png`;
-    a.href = canvas.toDataURL('image/png', 1.0);
-    a.click();
+    try {
+      const { blob, filename } = await generateBuilderCardBlob(state);
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error('PNG generation failed:', err);
+      showShareMsg("Couldn't generate your Builder ID. Please try again.");
+    }
   }
 
-  function shareX() {
-    const url = 'https://twitter.com/intent/tweet?text=' + buildXCaption(state);
-    window.open(url, '_blank', 'noopener');
+  async function handleShareX() {
+    try {
+      const { blob, filename } = await generateBuilderCardBlob(state);
+      const text = buildXCaption(state);
+      const result = await shareBuilderCard({ blob, filename, text, platform: 'x' });
+      
+      // No need to show a message on fallback since we just open the compose URL.
+      if (result === 'fallback_download') {
+        // Silently opened new tab.
+      }
+    } catch (err) {
+      console.error('PNG generation failed:', err);
+      showShareMsg("Couldn't generate your Builder ID. Please try again.");
+    }
   }
 
-  function shareLinkedIn() {
-    const url = 'https://www.linkedin.com/sharing/share-offsite/?url=' +
-      encodeURIComponent('https://hackerhouse.show') +
-      '&summary=' + buildLinkedInCaption(state);
-    window.open(url, '_blank', 'noopener');
+  async function handleShareLinkedIn() {
+    try {
+      const { blob, filename } = await generateBuilderCardBlob(state);
+      const text = buildLinkedInCaption();
+      const result = await shareBuilderCard({ blob, filename, text, platform: 'linkedin' });
+      
+      // No need to show a message on fallback since we just open the compose URL.
+      if (result === 'fallback_download') {
+        // Silently opened new tab.
+      }
+    } catch (err) {
+      console.error('PNG generation failed:', err);
+      showShareMsg("Couldn't generate your Builder ID. Please try again.");
+    }
   }
 
   const isDone = status === 'done';
@@ -61,31 +87,27 @@ export default function GeneratorActions({ state, onGenerate, status }) {
           <button
             id="share-x-btn"
             className="gen-actions__btn gen-actions__btn--x"
-            onClick={shareX}
+            onClick={handleShareX}
           >
             𝕏 SHARE
           </button>
           <button
             id="share-li-btn"
             className="gen-actions__btn gen-actions__btn--li"
-            onClick={shareLinkedIn}
+            onClick={handleShareLinkedIn}
           >
             in LINKEDIN
           </button>
         </div>
       )}
 
-      <div className="gen-actions__team-hint">
-        <button
-          id="add-crew-btn"
-          className="gen-actions__crew"
-          disabled
-          title="Coming soon — create a combined team frame"
-        >
-          + ADD YOUR CREW
-        </button>
-        <span className="gen-actions__crew-hint">Team frames — coming soon</span>
-      </div>
+      {shareMsg && (
+        <div className="gen-actions__share-msg" role="status">
+          {shareMsg}
+        </div>
+      )}
+
+
     </div>
   );
 }

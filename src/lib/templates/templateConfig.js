@@ -1,285 +1,150 @@
 /**
  * Template Layout Configuration
  * =============================================================
- * ALL COORDINATES are in the original template image pixel space.
+ * DERIVED FROM TEMPLATE_COORDS.js — the single source of truth.
  *
- * Actual template image dimensions (verified with sips):
- *   Hacker House : 1024 × 1536 px (portrait)
- *   Beach        : 1023 × 1537 px (portrait)
- *   Minimal      : 1024 × 1536 px (portrait)
- *   Boarding Pass: 1536 × 1024 px (landscape)
+ * This file bridges the TEMPLATE_COORDS coordinate format
+ * (used by the live preview) into the format expected by
+ * the canvas template renderers (used for PNG export).
  *
- * Coordinates were mapped by visual inspection of each template image.
- * The renderer ONLY overlays: user photo, name, stack, builderClass,
- * builderId text, and QR code. Nothing else.
+ * DO NOT hardcode coordinates here. All layout values are
+ * derived from TEMPLATE_COORDS so preview ↔ PNG stay in sync.
  */
+import { TEMPLATE_COORDS } from '../TEMPLATE_COORDS.js';
+
 import hackerHouseImgSrc  from '../../components/templates/Hacker_House.png';
 import beachImgSrc        from '../../components/templates/Beach.png';
 import minimalImgSrc      from '../../components/templates/Minimal.png';
 import boardingPassImgSrc from '../../components/templates/Boarding_Pass.png';
 
+// ── Bridge helpers ─────────────────────────────────────────────
+// Convert TEMPLATE_COORDS text field → canvas renderer text config.
+// TEMPLATE_COORDS uses: { x, y, w, h, fontSize, fontWeight, fontFamily, color, align }
+// Canvas renderers expect: { x, y, maxWidth, font, color, align }
+
+function resolveFontConfig(field) {
+  const weight = field.fontWeight || 700;
+  const size   = field.fontSize  || 24;
+  let family = field.fontFamily || '"Space Mono", monospace';
+  if (family.includes('var(--font-mono)'))      family = '"Space Mono", monospace';
+  if (family.includes('var(--font-editorial)')) family = '"DM Sans", sans-serif';
+  const style = family.includes('DM Sans') ? 'italic' : 'normal';
+  return { family, size, weight, style };
+}
+
+function textConfig(field) {
+  return {
+    x:        field.x + (field.align === 'center' ? field.w / 2 : 0),
+    y:        field.y + field.h / 2,
+    maxWidth: field.w,
+    font:     resolveFontConfig(field),
+    color:    field.color || '#1a1a1a',
+    align:    field.align || 'left',
+    baseline: 'middle',
+  };
+}
+
+
+function photoConfig(coords) {
+  const frame = coords.photoFrame;
+  return {
+    x:      frame.x,
+    y:      frame.y,
+    width:  frame.w,
+    height: frame.h,
+    radius: frame.radius || 12,
+  };
+}
+
+function qrConfig(qr) {
+  return {
+    x:      qr.x,
+    y:      qr.y,
+    width:  qr.w,
+    height: qr.h,
+    dark:   qr.dark  || '#0C4A1E',
+    light:  qr.light || '#FFF8EE',
+  };
+}
+
+// ── Template image map ─────────────────────────────────────────
+const IMAGES = {
+  'hacker-house':  hackerHouseImgSrc,
+  'beach':         beachImgSrc,
+  'minimal':       minimalImgSrc,
+  'boarding-pass': boardingPassImgSrc,
+};
+
+// ── Build config for each template from TEMPLATE_COORDS ────────
+
+function buildConfig(templateId) {
+  const coords = TEMPLATE_COORDS[templateId];
+  if (!coords) throw new Error(`Unknown template: ${templateId}`);
+
+  const config = {
+    id:         coords.id,
+    label:      coords.label,
+    image:      IMAGES[templateId],
+    dimensions: { width: coords.W, height: coords.H },
+
+    photoFrame: photoConfig(coords),
+    photo:      photoConfig(coords),
+
+    nameText:         textConfig(coords.name),
+    builderIdText:    textConfig(coords.builderId),
+    stackText:        textConfig(coords.stack),
+    builderClassText: textConfig(coords.builderClass),
+
+    qr: qrConfig(coords.qr),
+  };
+
+
+
+  return config;
+}
+
+// ── Boarding Pass has extra stub fields ─────────────────────────
+
+function buildBoardingPassConfig() {
+  const config = buildConfig('boarding-pass');
+  const coords = TEMPLATE_COORDS['boarding-pass'];
+
+  // The boarding pass template has stub text fields that don't exist
+  // in TEMPLATE_COORDS — use the existing name/class/id fields as basis
+  // for the rotated stub column. These are hand-tuned for the stub strip.
+  config.stubName = {
+    x:        1310,
+    y:        230,
+    maxWidth: 200,
+    font:     'bold 22px "Space Mono", monospace',
+    color:    '#1a1a1a',
+    align:    'center',
+  };
+  config.stubClass = {
+    x:        1310,
+    y:        658,
+    maxWidth: 200,
+    font:     '20px "Space Mono", monospace',
+    color:    '#1a1a1a',
+    align:    'center',
+  };
+  config.stubId = {
+    x:        1310,
+    y:        752,
+    maxWidth: 200,
+    font:     'bold 20px "Space Mono", monospace',
+    color:    '#4A2574',
+    align:    'center',
+  };
+
+  return config;
+}
+
+// ── Export ──────────────────────────────────────────────────────
+
 export const TEMPLATE_CONFIGS = {
-
-  /* ─────────────────────────────────────────────────────────────
-     HACKER HOUSE  1024 × 1536
-     ─ Large portrait silhouette frame, centre of card
-     ─ Dark-green name banner below photo (existing design element)
-     ─ Cream data section: BUILDER ID, STACK, BUILDER CLASS lines
-     ─ QR: empty pink-border rectangle in bottom third
-   ───────────────────────────────────────────────────────────── */
-  'hacker-house': {
-    id:    'hacker-house',
-    label: 'HACKER HOUSE',
-    image: hackerHouseImgSrc,
-    dimensions: { width: 1024, height: 1536 },
-
-    // Silhouette photo region
-    photoFrame: { x: 337, y: 450, width: 340, height: 440, radius: 12 },
-    photo: { x: 337, y: 450, width: 340, height: 440, radius: 12 },
-
-    // Dark-green nameplate pill — text is centred inside the banner
-    nameText: {
-      x:        512,        // canvas centre-x
-      y:        958,       // baseline
-      maxWidth: 720,
-      font:     'bold 52px "Space Mono", monospace',
-      color:    '#F5F0DC',
-      align:    'center'
-    },
-
-    // Fields below the photo
-    builderIdText: {
-      x:        375,
-      y:        1040,
-      maxWidth: 400,
-      font:     'bold 22px "Space Mono", monospace',
-      color:    '#0C4A1E',
-      align:    'left'
-    },
-
-    stackText: {
-      x:        355,
-      y:        1082,
-      maxWidth: 450,
-      font:     'bold 22px "Space Mono", monospace',
-      color:    '#0C4A1E',
-      align:    'left'
-    },
-
-    builderClassText: {
-      x:        470,
-      y:        1140,
-      maxWidth: 450,
-      font:     'bold 22px "Space Mono", monospace',
-      color:    '#0C4A1E',
-      align:    'left'
-    },
-
-    bioText: {
-      x:        512,
-      y:        1180,
-      maxWidth: 720,
-      font:     'italic 400 24px "DM Sans", sans-serif',
-      color:    'rgba(12, 74, 30, 0.8)',
-      align:    'center'
-    },
-
-    // QR Code
-    qr: { x: 300, y: 1310, width: 215, height: 215, dark: '#0C4A1E', light: '#FFF8EE' }
-  },
-
-  /* ─────────────────────────────────────────────────────────────
-     BEACH  1023 × 1537
-     ─ Portrait frame top-left
-     ─ Cream name box top-right (first rounded rect)
-     ─ "BUILDER ID:" cream box top-right (second rounded rect)
-     ─ Stack / Class lines mid-right
-     ─ Large QR square bottom centre
-   ───────────────────────────────────────────────────────────── */
-  'beach': {
-    id:    'beach',
-    label: 'BEACH',
-    image: beachImgSrc,
-    dimensions: { width: 1023, height: 1537 },
-
-    photoFrame: { x: 48, y: 445, width: 330, height: 380, radius: 14 },
-    photo: { x: 48, y: 445, width: 330, height: 380, radius: 14 },
-
-    nameText: {
-      x:        511,        // centre of name cream box
-      y:        505,
-      maxWidth: 380,
-      font:     'bold 38px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'center'
-    },
-
-    builderIdText: {
-      x:        430,        // after "BUILDER ID:" printed label
-      y:        573,
-      maxWidth: 350,
-      font:     'bold 28px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'left'
-    },
-
-    stackText: {
-      x:        440,
-      y:        642,
-      maxWidth: 500,
-      font:     'bold 30px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'left'
-    },
-
-    builderClassText: {
-      x:        440,
-      y:        708,
-      maxWidth: 500,
-      font:     'bold 30px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'left'
-    },
-
-    qr: { x: 340, y: 1090, width: 230, height: 230, dark: '#0C4A1E', light: '#FFF8EE' }
-  },
-
-  /* ─────────────────────────────────────────────────────────────
-     MINIMAL  1024 × 1536
-     ─ Centre portrait frame (teal rounded-rect border)
-     ─ Name below photo centre
-     ─ Stack / Class below name
-     ─ QR square in bottom navy section
-   ───────────────────────────────────────────────────────────── */
-  'minimal': {
-    id:    'minimal',
-    label: 'MINIMAL',
-    image: minimalImgSrc,
-    dimensions: { width: 1024, height: 1536 },
-
-    photoFrame: { x: 290, y: 492, width: 444, height: 470, radius: 16 },
-    photo: { x: 290, y: 492, width: 444, height: 470, radius: 16 },
-
-    nameText: {
-      x:        512,
-      y:        1035,
-      maxWidth: 700,
-      font:     'bold 50px "Space Mono", monospace',
-      color:    '#1a2744',
-      align:    'center'
-    },
-
-    builderIdText: {
-      // In the navy footer strip — right-side area
-      x:        395,
-      y:        1436,
-      maxWidth: 440,
-      font:     'bold 24px "Space Mono", monospace',
-      color:    '#F37825',
-      align:    'left'
-    },
-
-    stackText: {
-      x:        270,
-      y:        1107,
-      maxWidth: 660,
-      font:     'bold 34px "Space Mono", monospace',
-      color:    '#D9534F',
-      align:    'left'
-    },
-
-    builderClassText: {
-      x:        270,
-      y:        1167,
-      maxWidth: 660,
-      font:     'bold 32px "Space Mono", monospace',
-      color:    '#1A7A6E',
-      align:    'left'
-    },
-
-    qr: { x: 310, y: 1330, width: 200, height: 200, dark: '#0B2545', light: '#FFFFFF' }
-  },
-
-  /* ─────────────────────────────────────────────────────────────
-     BOARDING PASS  1536 × 1024  (landscape)
-     ─ Small portrait box left side of main ticket
-     ─ Name after "BUILDER ID:" in right section
-     ─ Stack / Class mid ticket
-     ─ QR bottom centre of main ticket
-     ─ Stub (right column) repeats key info
-   ───────────────────────────────────────────────────────────── */
-  'boarding-pass': {
-    id:    'boarding-pass',
-    label: 'BOARDING PASS',
-    image: boardingPassImgSrc,
-    dimensions: { width: 1536, height: 1024 },
-
-    photoFrame: { x: 183, y: 452, width: 258, height: 290, radius: 12 },
-    photo: { x: 183, y: 452, width: 258, height: 290, radius: 12 },
-
-    // Name above the "BUILDER ID:" field, right of photo
-    nameText: {
-      x:        475,
-      y:        502,
-      maxWidth: 420,
-      font:     'bold 40px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'left'
-    },
-
-    builderIdText: {
-      x:        620,        // after "BUILDER ID:" printed label
-      y:        558,
-      maxWidth: 380,
-      font:     'bold 30px "Space Mono", monospace',
-      color:    '#4A2574',
-      align:    'left'
-    },
-
-    stackText: {
-      x:        645,
-      y:        620,
-      maxWidth: 355,
-      font:     'bold 30px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'left'
-    },
-
-    builderClassText: {
-      x:        700,
-      y:        682,
-      maxWidth: 300,
-      font:     'bold 28px "Space Mono", monospace',
-      color:    '#cc3c00',
-      align:    'left'
-    },
-
-    qr: { x: 393, y: 772, width: 165, height: 165, dark: '#0C4A1E', light: '#FFF8EE' },
-
-    // Right-side stub column
-    stubName: {
-      x:        1310,
-      y:        230,
-      maxWidth: 200,
-      font:     'bold 22px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'center'
-    },
-    stubClass: {
-      x:        1310,
-      y:        658,
-      maxWidth: 200,
-      font:     '20px "Space Mono", monospace',
-      color:    '#1a1a1a',
-      align:    'center'
-    },
-    stubId: {
-      x:        1310,
-      y:        752,
-      maxWidth: 200,
-      font:     'bold 20px "Space Mono", monospace',
-      color:    '#4A2574',
-      align:    'center'
-    }
-  }
+  'hacker-house':  buildConfig('hacker-house'),
+  'beach':         buildConfig('beach'),
+  'minimal':       buildConfig('minimal'),
+  'boarding-pass': buildBoardingPassConfig(),
 };

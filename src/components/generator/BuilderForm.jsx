@@ -32,32 +32,6 @@ export default function BuilderForm({ state, onChange }) {
         />
       </div>
 
-      <div className="form-field">
-        <label className="form-label" htmlFor="field-bio">BIO</label>
-        <textarea
-          id="field-bio"
-          className="form-input form-textarea"
-          placeholder="Building things that probably shouldn't work."
-          maxLength={160}
-          rows={3}
-          {...field('bio')}
-        />
-        <span className="form-count">{(state.bio || '').length}/160</span>
-      </div>
-
-      <div className="form-field">
-        <label className="form-label" htmlFor="field-team">
-          TEAM <span className="form-optional">(OPTIONAL)</span>
-        </label>
-        <input
-          id="field-team"
-          className="form-input"
-          type="text"
-          placeholder="Rogue Builders"
-          maxLength={40}
-          {...field('team')}
-        />
-      </div>
     </div>
   );
 }
