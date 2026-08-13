@@ -45,7 +45,7 @@ export default {
 
     // ── LAYER 2: User photo ───────────────────────────────────────────────
     if (photo) {
-      const { x, y, width, height, radius } = cfg.photo;
+      const { x, y, width, height, radius } = cfg.photoFrame || cfg.photo;
       drawRectPhoto(ctx, photo, x, y, width, height, radius, photoCrop || {});
     }
 

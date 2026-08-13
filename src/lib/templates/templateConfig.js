@@ -34,49 +34,57 @@ export const TEMPLATE_CONFIGS = {
     dimensions: { width: 1024, height: 1536 },
 
     // Silhouette photo region
-    photo: { x: 208, y: 432, width: 608, height: 548, radius: 12 },
+    photoFrame: { x: 337, y: 450, width: 340, height: 440, radius: 12 },
+    photo: { x: 337, y: 450, width: 340, height: 440, radius: 12 },
 
     // Dark-green nameplate pill — text is centred inside the banner
     nameText: {
       x:        512,        // canvas centre-x
-      y:        1063,       // baseline
+      y:        958,       // baseline
       maxWidth: 720,
       font:     'bold 52px "Space Mono", monospace',
       color:    '#F5F0DC',
       align:    'center'
     },
 
-    // After the printed label "BUILDER ID:" (value only goes here)
+    // Fields below the photo
     builderIdText: {
       x:        375,
-      y:        1130,
-      maxWidth: 575,
-      font:     'bold 34px "Space Mono", monospace',
-      color:    '#1a1a1a',
+      y:        1040,
+      maxWidth: 400,
+      font:     'bold 22px "Space Mono", monospace',
+      color:    '#0C4A1E',
       align:    'left'
     },
 
-    // After the printed label "STACK –"
     stackText: {
       x:        355,
-      y:        1187,
-      maxWidth: 595,
-      font:     'bold 34px "Space Mono", monospace',
-      color:    '#1a1a1a',
+      y:        1082,
+      maxWidth: 450,
+      font:     'bold 22px "Space Mono", monospace',
+      color:    '#0C4A1E',
       align:    'left'
     },
 
-    // After the printed label "BUILDER CLASS –"
     builderClassText: {
       x:        470,
-      y:        1245,
-      maxWidth: 480,
-      font:     'bold 32px "Space Mono", monospace',
-      color:    '#1a1a1a',
+      y:        1140,
+      maxWidth: 450,
+      font:     'bold 22px "Space Mono", monospace',
+      color:    '#0C4A1E',
       align:    'left'
     },
 
-    // Pink-border QR placeholder rectangle (lower centre)
+    bioText: {
+      x:        512,
+      y:        1180,
+      maxWidth: 720,
+      font:     'italic 400 24px "DM Sans", sans-serif',
+      color:    'rgba(12, 74, 30, 0.8)',
+      align:    'center'
+    },
+
+    // QR Code
     qr: { x: 300, y: 1310, width: 215, height: 215, dark: '#0C4A1E', light: '#FFF8EE' }
   },
 
@@ -94,6 +102,7 @@ export const TEMPLATE_CONFIGS = {
     image: beachImgSrc,
     dimensions: { width: 1023, height: 1537 },
 
+    photoFrame: { x: 48, y: 445, width: 330, height: 380, radius: 14 },
     photo: { x: 48, y: 445, width: 330, height: 380, radius: 14 },
 
     nameText: {
@@ -148,6 +157,7 @@ export const TEMPLATE_CONFIGS = {
     image: minimalImgSrc,
     dimensions: { width: 1024, height: 1536 },
 
+    photoFrame: { x: 290, y: 492, width: 444, height: 470, radius: 16 },
     photo: { x: 290, y: 492, width: 444, height: 470, radius: 16 },
 
     nameText: {
@@ -204,6 +214,7 @@ export const TEMPLATE_CONFIGS = {
     image: boardingPassImgSrc,
     dimensions: { width: 1536, height: 1024 },
 
+    photoFrame: { x: 183, y: 452, width: 258, height: 290, radius: 12 },
     photo: { x: 183, y: 452, width: 258, height: 290, radius: 12 },
 
     // Name above the "BUILDER ID:" field, right of photo

@@ -24,6 +24,14 @@
 
 export const DEBUG_OVERLAYS = false;
 
+/**
+ * CALIBRATION_MODE
+ * Set to true ONLY during local development to show the FrameCalibrator overlay.
+ * MUST be false for production.
+ * Also activated automatically when the URL contains ?calibrate=1
+ */
+export const CALIBRATION_MODE = false;
+
 /** Convert original-px coordinate to CSS percentage string */
 export function pct(value, dimension) {
   return `${((value / dimension) * 100).toFixed(4)}%`;
@@ -37,53 +45,98 @@ export function pct(value, dimension) {
 // builderId:    Blank line after printed "BUILDER ID:" label
 // stack:        Blank line after printed "STACK –" label
 // builderClass: Blank line after printed "BUILDER CLASS –" label
+// bio:          Bio/Quote region
 // qr:           Pink-border QR placeholder rectangle (lower centre)
 // ─────────────────────────────────────────────────────────────
 const hackerHouse = {
-  id:    'hacker-house',
+  id: 'hacker-house',
   label: 'HACKER HOUSE',
   W: 1024,
   H: 1536,
 
+  /**
+   * photoFrame — authoritative photo bounding box in native canvas px.
+   * Used by:
+   *   - TemplateRenderer.jsx  → clips the CSS <img> to this rect (border-radius applied)
+   *   - hackerHouseTemplate.js → drawRectPhoto() uses this to clip the canvas render
+   * Adjust these values with the FrameCalibrator tool (?calibrate=1).
+   */
+  photoFrame: {
+    x: 315,
+    y: 540,
+    w: 390,
+    h: 390,
+    radius: 12,
+  },
+
+  // Legacy alias kept so existing canvas templates still destructure cfg.photo
   photo: {
-    x: 207, y: 430, w: 610, h: 550,
-    objectPosition: '50% 18%',
+    x: 282,
+    y: 418,
+    w: 450,
+    h: 400,
+    objectPosition: '50% 18%'
   },
-
   name: {
-    x: 120, y: 990, w: 790, h: 80,
-    align: 'center',
-    color: '#F5F0DC',
-    fontWeight: '800',
+    x: 152,
+    y: 960,
+    w: 720,
+    h: 40,
+    fontFamily: 'var(--font-mono)',
     fontSize: 52,
+    fontWeight: 700,
+    color: '#F5F0DC',
+    align: 'center'
   },
-
   builderId: {
-    x: 375, y: 1095, w: 595, h: 45,
-    align: 'left',
-    color: '#1a1a1a',
-    fontWeight: '700',
-    fontSize: 34,
+    x: 395,
+    y: 1045,
+    w: 400,
+    h: 30,
+    fontFamily: 'var(--font-mono)',
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#0C4A1E',
+    align: 'left'
   },
-
   stack: {
-    x: 345, y: 1150, w: 625, h: 45,
-    align: 'left',
-    color: '#1a1a1a',
-    fontWeight: '700',
-    fontSize: 34,
+    x: 355,
+    y: 1095,
+    w: 450,
+    h: 30,
+    fontFamily: 'var(--font-mono)',
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#0C4A1E',
+    align: 'left'
   },
-
   builderClass: {
-    x: 455, y: 1206, w: 515, h: 45,
-    align: 'left',
-    color: '#1a1a1a',
-    fontWeight: '700',
-    fontSize: 32,
+    x: 470,
+    y: 1155,
+    w: 450,
+    h: 30,
+    fontFamily: 'var(--font-mono)',
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#0C4A1E',
+    align: 'left'
   },
-
+  bio: {
+    x: 152,
+    y: 1155,
+    w: 720,
+    h: 60,
+    fontFamily: 'var(--font-editorial)',
+    fontSize: 22,
+    fontWeight: 400,
+    color: 'rgba(12, 74, 30, 0.8)',
+    align: 'center'
+  },
   qr: {
-    x: 298, y: 1305, w: 215, h: 210,
+    x: 395,
+    y: 1240,
+    w: 230,
+    h: 230,
     dark: '#0C4A1E',
     light: '#FFF8EE',
   },
@@ -100,10 +153,22 @@ const hackerHouse = {
 // qr:           Large cream QR square at bottom centre
 // ─────────────────────────────────────────────────────────────
 const beach = {
-  id:    'beach',
+  id: 'beach',
   label: 'BEACH',
   W: 1023,
   H: 1537,
+
+  /**
+   * photoFrame — authoritative photo bounding box in native canvas px.
+   * Adjust with FrameCalibrator tool (?calibrate=1).
+   */
+  photoFrame: {
+    x: 95,
+    y: 480,
+    w: 300,
+    h: 435,
+    radius: 14,
+  },
 
   photo: {
     x: 47, y: 443, w: 327, h: 377,
@@ -111,39 +176,39 @@ const beach = {
   },
 
   name: {
-    x: 395, y: 463, w: 590, h: 68,
+    x: 325, y: 525, w: 585, h: 68,
     align: 'center',
     color: '#1a1a1a',
     fontWeight: '800',
-    fontSize: 42,
+    fontSize: 35,
   },
 
   builderId: {
-    x: 430, y: 540, w: 540, h: 58,
+    x: 565, y: 615, w: 540, h: 58,
     align: 'left',
     color: '#1a1a1a',
     fontWeight: '700',
-    fontSize: 30,
+    fontSize: 20,
   },
 
   stack: {
-    x: 445, y: 627, w: 525, h: 45,
+    x: 600, y: 695, w: 525, h: 45,
     align: 'left',
     color: '#1a1a1a',
     fontWeight: '700',
-    fontSize: 30,
+    fontSize: 17,
   },
 
   builderClass: {
-    x: 445, y: 695, w: 525, h: 45,
+    x: 680, y: 780, w: 525, h: 45,
     align: 'left',
     color: '#1a1a1a',
     fontWeight: '700',
-    fontSize: 30,
+    fontSize: 17,
   },
 
   qr: {
-    x: 335, y: 1085, w: 230, h: 225,
+    x: 390, y: 1190, w: 230, h: 300,
     dark: '#0C4A1E',
     light: '#FFF8EE',
   },
@@ -160,10 +225,22 @@ const beach = {
 // qr:           White QR square in navy footer section
 // ─────────────────────────────────────────────────────────────
 const minimal = {
-  id:    'minimal',
+  id: 'minimal',
   label: 'MINIMAL',
   W: 1024,
   H: 1536,
+
+  /**
+   * photoFrame — authoritative photo bounding box in native canvas px.
+   * Adjust with FrameCalibrator tool (?calibrate=1).
+   */
+  photoFrame: {
+    x: 355,
+    y: 650,
+    w: 300,
+    h: 334,
+    radius: 16,
+  },
 
   photo: {
     x: 288, y: 487, w: 446, h: 474,
@@ -171,31 +248,31 @@ const minimal = {
   },
 
   name: {
-    x: 165, y: 995, w: 695, h: 58,
+    x: 165, y: 975, w: 695, h: 58,
     align: 'center',
     color: '#1a2744',
     fontWeight: '800',
-    fontSize: 48,
+    fontSize: 40,
   },
 
   stack: {
-    x: 265, y: 1068, w: 680, h: 46,
+    x: 430, y: 1015, w: 680, h: 46,
     align: 'left',
     color: '#D9534F',
     fontWeight: '700',
-    fontSize: 34,
+    fontSize: 24,
   },
 
   builderClass: {
-    x: 265, y: 1132, w: 680, h: 46,
+    x: 545, y: 1090, w: 680, h: 46,
     align: 'left',
     color: '#1A7A6E',
     fontWeight: '700',
-    fontSize: 32,
+    fontSize: 24,
   },
 
   builderId: {
-    x: 395, y: 1428, w: 430, h: 32,
+    x: 755, y: 1300, w: 430, h: 32,
     align: 'left',
     color: '#F37825',
     fontWeight: '700',
@@ -203,7 +280,7 @@ const minimal = {
   },
 
   qr: {
-    x: 308, y: 1320, w: 208, h: 208,
+    x: 370, y: 1263, w: 250, h: 180,
     dark: '#0B2545',
     light: '#FFFFFF',
   },
@@ -220,10 +297,22 @@ const minimal = {
 // qr:           Cream QR square, bottom centre of main ticket
 // ─────────────────────────────────────────────────────────────
 const boardingPass = {
-  id:    'boarding-pass',
+  id: 'boarding-pass',
   label: 'BOARDING PASS',
   W: 1536,
   H: 1024,
+
+  /**
+   * photoFrame — authoritative photo bounding box in native canvas px.
+   * Adjust with FrameCalibrator tool (?calibrate=1).
+   */
+  photoFrame: {
+    x: 283,
+    y: 520,
+    w: 258,
+    h: 288,
+    radius: 12,
+  },
 
   photo: {
     x: 183, y: 450, w: 258, h: 288,
@@ -231,15 +320,15 @@ const boardingPass = {
   },
 
   name: {
-    x: 475, y: 460, w: 415, h: 52,
+    x: 1205, y: 190, w: 415, h: 52,
     align: 'left',
     color: '#1a1a1a',
     fontWeight: '800',
-    fontSize: 38,
+    fontSize: 28,
   },
 
   builderId: {
-    x: 618, y: 525, w: 375, h: 46,
+    x: 700, y: 525, w: 375, h: 46,
     align: 'left',
     color: '#4A2574',
     fontWeight: '700',
@@ -247,23 +336,23 @@ const boardingPass = {
   },
 
   stack: {
-    x: 642, y: 592, w: 351, h: 46,
+    x: 730, y: 607, w: 351, h: 46,
     align: 'left',
-    color: '#1a1a1a',
+    color: '#4A2574',
     fontWeight: '700',
-    fontSize: 28,
+    fontSize: 20,
   },
 
   builderClass: {
-    x: 697, y: 656, w: 296, h: 46,
+    x: 820, y: 676, w: 296, h: 46,
     align: 'left',
     color: '#cc3c00',
     fontWeight: '700',
-    fontSize: 26,
+    fontSize: 17,
   },
 
   qr: {
-    x: 390, y: 765, w: 165, h: 158,
+    x: 470, y: 840, w: 165, h: 158,
     dark: '#0C4A1E',
     light: '#FFF8EE',
   },
@@ -273,9 +362,9 @@ const boardingPass = {
 // Registry — single entry point for all templates
 // ─────────────────────────────────────────────────────────────
 export const TEMPLATE_COORDS = {
-  'hacker-house':  hackerHouse,
-  'beach':         beach,
-  'minimal':       minimal,
+  'hacker-house': hackerHouse,
+  'beach': beach,
+  'minimal': minimal,
   'boarding-pass': boardingPass,
 };
 

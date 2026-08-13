@@ -16,8 +16,9 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import './TemplateRenderer.css';
-import { TEMPLATE_COORDS, DEBUG_OVERLAYS, pct } from '../../lib/TEMPLATE_COORDS.js';
+import { TEMPLATE_COORDS, DEBUG_OVERLAYS, CALIBRATION_MODE, pct } from '../../lib/TEMPLATE_COORDS.js';
 import { makeQRCanvas, buildQRPayload } from '../../lib/qr.js';
+import FrameCalibrator from './FrameCalibrator.jsx';
 
 /* ── Template image imports (Vite hashes these for cache-busting) ── */
 import hackerHouseImg      from '../templates/Hacker_House.png';
@@ -74,14 +75,20 @@ function useQRDataUrl(builderId, qrConfig) {
 function slot(s, W, H) {
   return { left: pct(s.x, W), top: pct(s.y, H), width: pct(s.w, W), height: pct(s.h, H) };
 }
-
+/* ── Photo frame slot — uses photoFrame (authoritative) or falls back to photo ─ */
+function photoSlot(coords, W, H, scale) {
+  const frame = coords.photoFrame || coords.photo;
+  const radiusPx = frame.radius || 0;
+  const pos = slot(frame, W, H);
+  // Calculate border radius in pixels scaled to the preview size
+  return { ...pos, borderRadius: `${radiusPx * scale}px`, overflow: 'hidden' };
+}
 /* ── Component ──────────────────────────────────────────────────── */
 export default function TemplateRenderer({ state, flipped = false }) {
   const mode   = state.mode || 'hacker-house';
   const coords = TEMPLATE_COORDS[mode] || TEMPLATE_COORDS['hacker-house'];
-  const assets = TEMPLATE_IMAGES[mode]  || TEMPLATE_IMAGES['hacker-house'];
-
-  const { W, H }   = coords;
+  const assets = TEMPLATE_IMAGES[mode] || TEMPLATE_IMAGES['hacker-house'];
+  const { W, H } = coords;
   const sceneRef   = useRef(null);
   const sceneWidth = useElementWidth(sceneRef);
   const qrDataUrl  = useQRDataUrl(state.builderId, coords.qr);
@@ -89,6 +96,7 @@ export default function TemplateRenderer({ state, flipped = false }) {
   const scale      = sceneWidth > 0 ? sceneWidth / W : 1;
   const isLandscape = W > H;
   const dbg        = DEBUG_OVERLAYS ? ' tr-debug' : '';
+  const isCalibrating = CALIBRATION_MODE || (typeof window !== 'undefined' && window.location.search.includes('calibrate=1'));
 
   function fs(field) {
     return { '--tr-fs': `${Math.max(7, Math.round(field.fontSize * scale))}px`,
@@ -119,9 +127,11 @@ export default function TemplateRenderer({ state, flipped = false }) {
 
           {/* Layer 2: user photo (only when provided) */}
           {state.photo && (
-            <div className={`tr-slot tr-photo${dbg}`} style={slot(coords.photo, W, H)} {...dbgAttr('photo', coords.photo)}>
+            <div className={`tr-slot tr-photo${dbg}`} 
+                 style={photoSlot(coords, W, H, scale)} 
+                 {...dbgAttr('photo', coords.photoFrame || coords.photo)}>
               <img src={state.photo.src} alt="Builder photo" draggable={false}
-                   style={{ objectPosition: coords.photo.objectPosition }} />
+                   style={{ objectPosition: coords.photo.objectPosition || '50% 18%' }} />
             </div>
           )}
 
@@ -153,11 +163,22 @@ export default function TemplateRenderer({ state, flipped = false }) {
             </div>
           )}
 
-          {/* Layer 7: QR code */}
+          {/* Layer 7: bio */}
+          {state.bio?.trim() && coords.bio && (
+            <div className={`tr-slot tr-text${dbg}`} style={textStyle(coords.bio)} {...dbgAttr('bio', coords.bio)}>
+              <span>{state.bio.trim()}</span>
+            </div>
+          )}
+
+          {/* Layer 8: QR code */}
           {qrDataUrl && (
             <div className={`tr-slot tr-qr${dbg}`} style={slot(coords.qr, W, H)} {...dbgAttr('qr', coords.qr)}>
               <img src={qrDataUrl} alt="QR verification code" draggable={false} />
             </div>
+          )}
+
+          {isCalibrating && (
+            <FrameCalibrator W={W} H={H} initialFrame={photoFrame} scale={scale} />
           )}
 
         </div>

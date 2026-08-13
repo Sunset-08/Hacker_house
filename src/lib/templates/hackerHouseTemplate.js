@@ -16,7 +16,7 @@
  */
 import { TEMPLATE_CONFIGS } from './templateConfig.js';
 import { getCleanTemplateCanvas } from './templateUtils.js';
-import { drawRectPhoto, drawFitText, roundRect, drawCardBackground, drawLanyardSlot } from '../canvasUtils.js';
+import { drawRectPhoto, drawFitText, roundRect, drawCardBackground, drawLanyardSlot, wrapText } from '../canvasUtils.js';
 import { makeQRCanvas, buildQRPayload } from '../qr.js';
 
 const cfg = TEMPLATE_CONFIGS['hacker-house'];
@@ -31,7 +31,7 @@ export default {
   dimensions: { width: W, height: H },
 
   async render(ctx, state, _t) {
-    const { photo, photoCrop, name, stack, builderClass, builderId } = state;
+    const { photo, photoCrop, name, stack, builderClass, builderId, bio } = state;
 
     // ── LAYER 1: Template background image (untouched) ────────────────────
     try {
@@ -46,7 +46,7 @@ export default {
 
     // ── LAYER 2: User photo ───────────────────────────────────────────────
     if (photo) {
-      const { x, y, width, height, radius } = cfg.photo;
+      const { x, y, width, height, radius } = cfg.photoFrame || cfg.photo;
       drawRectPhoto(ctx, photo, x, y, width, height, radius, photoCrop || {});
     }
 
@@ -78,7 +78,20 @@ export default {
       drawFitText(ctx, builderClass.trim().toUpperCase(), c.x, c.y, c.maxWidth, c.font, c.color);
     }
 
-    // ── LAYER 7: QR code ─────────────────────────────────────────────────
+    // ── LAYER 7: Bio / Quote ──────────────────────────────────────────────
+    if (bio && bio.trim()) {
+      const c = cfg.bioText;
+      ctx.textAlign = c.align;
+      ctx.font = c.font;
+      ctx.fillStyle = c.color;
+      const lines = wrapText(ctx, bio.trim(), c.maxWidth);
+      // Ensure we handle longer bios gracefully (up to 3 lines)
+      lines.slice(0, 3).forEach((line, i) => {
+        ctx.fillText(line, c.x, c.y + i * 26);
+      });
+    }
+
+    // ── LAYER 8: QR code ─────────────────────────────────────────────────
     if (builderId && builderId.trim()) {
       const { x, y, width, height, dark, light } = cfg.qr;
       try {
