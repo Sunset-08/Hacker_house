@@ -145,34 +145,3 @@
   pointer-events: none;
   z-index: 999;
 }
-
-/* ── Developer calibration overlay (photo frame) ───────────────
-   Visible ONLY when DEBUG_OVERLAYS = true in TEMPLATE_COORDS.js.
-   Shows a labeled rectangle over the photo frame so developers
-   can verify and adjust coordinates per template.
-   Users never see this in production.                           */
-.tr-calibration {
-  position: absolute;
-  border: 2px dashed rgba(57, 255, 20, 0.9);
-  background: rgba(57, 255, 20, 0.08);
-  pointer-events: none;
-  z-index: 900;
-  overflow: visible;
-}
-
-.tr-calibration__label {
-  position: absolute;
-  bottom: -2px;
-  left: -2px;
-  transform: translateY(100%);
-  font-family: 'Space Mono', monospace;
-  font-size: 8px;
-  line-height: 1.4;
-  color: #39ff14;
-  background: rgba(0, 0, 0, 0.85);
-  padding: 3px 6px;
-  border-radius: 0 0 3px 3px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 901;
-}

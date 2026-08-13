@@ -46,7 +46,7 @@ const hackerHouse = {
   H: 1536,
 
   photo: {
-    x: 207, y: 430, w: 610, h: 550, radius: 12,
+    x: 207, y: 430, w: 610, h: 550,
     objectPosition: '50% 18%',
   },
 
@@ -106,7 +106,7 @@ const beach = {
   H: 1537,
 
   photo: {
-    x: 47, y: 443, w: 327, h: 377, radius: 14,
+    x: 47, y: 443, w: 327, h: 377,
     objectPosition: '50% 18%',
   },
 
@@ -166,7 +166,7 @@ const minimal = {
   H: 1536,
 
   photo: {
-    x: 288, y: 487, w: 446, h: 474, radius: 16,
+    x: 288, y: 487, w: 446, h: 474,
     objectPosition: '50% 18%',
   },
 
@@ -226,7 +226,7 @@ const boardingPass = {
   H: 1024,
 
   photo: {
-    x: 183, y: 450, w: 258, h: 288, radius: 12,
+    x: 183, y: 450, w: 258, h: 288,
     objectPosition: '50% 18%',
   },
 
