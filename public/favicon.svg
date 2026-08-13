@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#0c4a1e"/>
+  <!-- Trunk: slight curve, rising from base -->
+  <path d="M16 30 C15 24 17 18 16 12" stroke="#f0c72a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <!-- Fronds -->
+  <path d="M16 12 C12 10 7 11 4 14" stroke="#f0c72a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <path d="M16 12 C20 10 25 11 28 14" stroke="#f0c72a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <path d="M16 12 C14 7 13 3 15 1" stroke="#f0c72a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <path d="M16 12 C18 7 21 4 24 5" stroke="#f0c72a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <path d="M16 12 C14 7 11 5 8 6" stroke="#f0c72a" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <!-- Coconuts at base of fronds -->
+  <circle cx="16" cy="12" r="2" fill="#f0c72a"/>
+</svg>

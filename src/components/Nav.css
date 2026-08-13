@@ -1,0 +1,166 @@
+/* ============================================================
+   NAV — Minimal HH Goa top bar
+   ============================================================ */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: rgba(12, 74, 30, 0.88);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom: 1px solid rgba(240, 199, 42, 0.22);
+}
+
+.nav__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* --- Wordmark -------------------------------------------- */
+.nav__wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.nav__wordmark-hh {
+  font-family: var(--font-editorial);
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: var(--hh-yellow);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.nav__wordmark-sep {
+  font-family: var(--font-mono);
+  color: var(--hh-pink);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.nav__wordmark-goa {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--hh-cream);
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.nav__wordmark-year {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* --- Meta ------------------------------------------------- */
+.nav__meta {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.nav__meta-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--hh-pink);
+  animation: subtlePulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.nav__meta-sep {
+  color: rgba(245, 240, 220, 0.25);
+}
+
+/* --- Links ------------------------------------------------ */
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+}
+
+.nav__link {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid transparent;
+}
+
+.nav__link:hover {
+  color: var(--hh-yellow);
+  border-bottom-color: var(--hh-yellow);
+}
+
+.nav__cta {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--hh-green);
+  background: var(--hh-yellow);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav__cta:hover {
+  background: var(--hh-pink);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* --- Burger (mobile) -------------------------------------- */
+.nav__burger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.nav__burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--hh-yellow);
+  border-radius: 1px;
+  transition: transform 0.2s ease;
+}
+
+/* --- Responsive ------------------------------------------ */
+@media (max-width: 768px) {
+  .nav__meta  { display: none; }
+  .nav__links { display: none; }
+  .nav__burger { display: flex; }
+
+  .nav__wordmark-goa  { display: none; }
+  .nav__wordmark-year { display: none; }
+}
+
+@media (max-width: 480px) {
+  .nav__inner { padding: 0 var(--space-4); }
+}

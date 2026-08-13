@@ -1,0 +1,6 @@
+/* App-level resets — component styles live in their own CSS files */
+
+#root {
+  isolation: isolate; /* new stacking context */
+  min-height: 100dvh;
+}

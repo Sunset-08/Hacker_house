@@ -1,0 +1,147 @@
+/*
+ * TemplateRenderer.css
+ * ============================================================
+ *
+ * CRITICAL 3D FLIP RULES:
+ *   1. overflow:hidden must NOT be set on the element with
+ *      transform-style:preserve-3d — it breaks the 3D context.
+ *   2. Each .tr-face clips its OWN overflow independently.
+ *   3. .tr-scene sets perspective and sizes the container.
+ *   4. .tr-flipcard rotates; it must have no overflow.
+ *
+ * The aspect-ratio is set via CSS custom property --tr-ar
+ * so portrait (2/3) and landscape (3/2) both work correctly.
+ */
+
+/* ── Scene: perspective + sizing ────────────────────────────── */
+.tr-scene {
+  perspective: 1400px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  /* Height driven by aspect-ratio on the card inside */
+}
+
+.tr-scene--landscape {
+  max-width: 660px;
+}
+
+/* ── The actual flipping card ────────────────────────────────── */
+.tr-flipcard {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--tr-ar, 2 / 3);
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  /* NO overflow:hidden here — that breaks preserve-3d */
+  border-radius: 12px;
+  box-shadow:
+    0 16px 45px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(240, 199, 42, 0.25);
+}
+
+.tr-flipcard--flipped {
+  transform: rotateY(180deg);
+}
+
+/* ── Individual faces ─────────────────────────────────────────── */
+.tr-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  overflow: hidden;          /* clips on the face, not the preserve-3d parent */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.tr-face--front {
+  /* faces the viewer by default */
+  z-index: 2;
+}
+
+.tr-face--back {
+  transform: rotateY(180deg);
+}
+
+/* ── Template background image ─────────────────────────────────
+   object-fit:fill stretches to fill the face exactly.
+   The template PNG IS the card — no gaps, no crop.              */
+.tr-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Generic overlay slot ─────────────────────────────────────── */
+.tr-slot {
+  position: absolute;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Photo slot ───────────────────────────────────────────────── */
+.tr-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* object-position set inline per-template */
+}
+
+/* ── Text overlay ─────────────────────────────────────────────── */
+.tr-text {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tr-text span {
+  display: block;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size:   var(--tr-fs, 14px);
+  color:       var(--tr-color, #1a1a1a);
+  font-weight: var(--tr-fw, 700);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── QR code slot ─────────────────────────────────────────────── */
+.tr-qr img,
+.tr-qr canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Debug outlines (set DEBUG_OVERLAYS=true in TEMPLATE_COORDS) */
+.tr-debug {
+  outline: 2px dashed rgba(255, 30, 30, 0.8) !important;
+}
+.tr-debug::after {
+  content: attr(data-debug);
+  position: absolute;
+  top: 0; left: 0;
+  font-size: 7px;
+  background: rgba(255, 30, 30, 0.85);
+  color: #fff;
+  padding: 1px 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999;
+}
