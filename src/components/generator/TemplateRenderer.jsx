@@ -117,11 +117,47 @@ export default function TemplateRenderer({ state, flipped = false }) {
           {/* Layer 1: template artwork — fills 100% of face */}
           <img className="tr-bg" src={assets.front} alt={`${coords.label} template`} draggable={false} />
 
-          {/* Layer 2: user photo (only when provided) */}
+          {/* Layer 2: user photo — clipped to developer-defined frame */}
+          {/* The photo is ALWAYS cover-cropped to fill this exact rectangle.
+              Even tiny images (50×50) will upscale to fill the frame.
+              The frame determines the image size, never the other way around. */}
           {state.photo && (
-            <div className={`tr-slot tr-photo${dbg}`} style={slot(coords.photo, W, H)} {...dbgAttr('photo', coords.photo)}>
+            <div
+              className={`tr-slot tr-photo${dbg}`}
+              style={{
+                ...slot(coords.photo, W, H),
+                borderRadius: coords.photo.radius
+                  ? `${coords.photo.radius * scale}px`
+                  : undefined,
+              }}
+              {...dbgAttr('photo', coords.photo)}
+            >
               <img src={state.photo.src} alt="Builder photo" draggable={false}
                    style={{ objectPosition: coords.photo.objectPosition }} />
+            </div>
+          )}
+
+          {/* Developer calibration overlay — photo frame rectangle.
+              Only visible when DEBUG_OVERLAYS = true in TEMPLATE_COORDS.js.
+              Shows the exact frame coordinates so developers can adjust them. */}
+          {DEBUG_OVERLAYS && (
+            <div
+              className="tr-calibration"
+              style={{
+                ...slot(coords.photo, W, H),
+                borderRadius: coords.photo.radius
+                  ? `${coords.photo.radius * scale}px`
+                  : undefined,
+              }}
+            >
+              <div className="tr-calibration__label">
+                <strong>PHOTO FRAME</strong><br />
+                X: {coords.photo.x}<br />
+                Y: {coords.photo.y}<br />
+                W: {coords.photo.w}<br />
+                H: {coords.photo.h}<br />
+                R: {coords.photo.radius || 0}
+              </div>
             </div>
           )}
 

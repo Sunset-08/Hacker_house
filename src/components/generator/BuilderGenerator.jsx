@@ -4,7 +4,7 @@ import { renderCard } from '../../lib/cardRenderer.js';
 
 import PhotoUploader from './PhotoUploader.jsx';
 import ModeSelector from './ModeSelector.jsx';
-import ThemeSelector from './ThemeSelector.jsx';
+
 import BuilderForm from './BuilderForm.jsx';
 import BuilderClassPicker from './BuilderClassPicker.jsx';
 import BuilderCardPreview from './BuilderCardPreview.jsx';
@@ -15,7 +15,7 @@ function initState() {
     photo: null,
     photoCrop: { zoom: 1, offsetX: 0, offsetY: 0 },
     mode: 'hacker-house',
-    theme: 'classic',
+
     name: '',
     stack: '',
     bio: '',
@@ -105,10 +105,7 @@ export default function BuilderGenerator() {
             onChange={v => update('mode', v)}
           />
 
-          <ThemeSelector
-            theme={state.theme}
-            onChange={v => update('theme', v)}
-          />
+
 
           <BuilderForm
             state={state}

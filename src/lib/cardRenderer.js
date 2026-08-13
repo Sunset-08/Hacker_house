@@ -25,11 +25,8 @@ export async function renderCard(canvas, state, opts = {}) {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  const { THEMES } = await import('./themes.js');
-  const t = THEMES[state.theme] || THEMES.classic;
-
   await ensureFonts();
-  await tmpl.render(ctx, state, t);
+  await tmpl.render(ctx, state, null);
 }
 
 /**
@@ -42,11 +39,8 @@ export async function renderCardBack(canvas, state, opts = {}) {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  const { THEMES } = await import('./themes.js');
-  const t = THEMES[state.theme] || THEMES.classic;
-
   await ensureFonts();
-  await tmpl.renderBack(ctx, state, t);
+  await tmpl.renderBack(ctx, state, null);
 }
 
 /**
